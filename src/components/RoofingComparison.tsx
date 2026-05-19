@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Star, Award, CheckCircle2, RotateCcw, Calculator, X } from "lucide-react";
-import { useFeatures } from "@/lib/features-store";
-
-type Tier = "best" | "better" | "good";
-
+import { useFeatures, type FeatureItem, type Tier } from "@/lib/features-store";
 
 const TIERS: { key: Tier; label: string; icon: typeof Star; colorClass: string; tagline: string }[] = [
   { key: "best", label: "Best", icon: Star, colorClass: "bg-brand-red text-brand-red-foreground", tagline: "Maximum Protection. Maximum Peace of Mind." },
@@ -11,15 +8,26 @@ const TIERS: { key: Tier; label: string; icon: typeof Star; colorClass: string; 
   { key: "good", label: "Good", icon: CheckCircle2, colorClass: "bg-brand-gray text-brand-gray-foreground", tagline: "Basic Protection. Budget Friendly." },
 ];
 
-const STORAGE_KEY = "klaus-roofing-comparison-v1";
+const STORAGE_KEY = "klaus-roofing-comparison-v2";
 const PRICE_KEY = "klaus-roofing-prices-v1";
+
+function featureLabel(feat: FeatureItem): string {
+  return typeof feat === "string" ? feat : feat.label;
+}
+
+function featureKey(feat: FeatureItem, index: number): string {
+  return typeof feat === "string" ? feat : `${feat.label}--${index}`;
+}
+
+function isTierLabel(feat: FeatureItem): feat is { label: string; tiers: Record<Tier, string> } {
+  return typeof feat !== "string";
+}
 
 export default function RoofingComparison() {
   const [FEATURES] = useFeatures();
   const [checks, setChecks] = useState<Record<string, boolean>>({});
   const [prices, setPrices] = useState<Record<Tier, string>>({ best: "", better: "", good: "" });
   const [calcTier, setCalcTier] = useState<Tier | null>(null);
-
 
   useEffect(() => {
     try {
@@ -101,16 +109,20 @@ export default function RoofingComparison() {
             </thead>
             <tbody>
               {FEATURES.map((feat, i) => (
-                <tr key={feat} className="border-t border-brand-red/30">
+                <tr key={featureKey(feat, i)} className="border-t border-brand-red/30">
                   <td className="bg-brand-red text-brand-red-foreground font-bold text-center w-12 px-2 py-3">
                     {i + 1}
                   </td>
                   <td className="px-4 py-3 font-semibold text-sm uppercase tracking-wide bg-brand-dark text-brand-dark-foreground">
-                    {feat}
+                    {featureLabel(feat)}
                   </td>
                   {TIERS.map((t) => (
                     <td key={t.key} className="text-center px-4 py-3 border-l border-brand-red/30">
-                      <CheckBox checked={isChecked(i, t.key)} onClick={() => toggle(i, t.key)} />
+                      {isTierLabel(feat) ? (
+                        <span className="text-sm font-bold">{feat.tiers[t.key]}</span>
+                      ) : (
+                        <CheckBox checked={isChecked(i, t.key)} onClick={() => toggle(i, t.key)} />
+                      )}
                     </td>
                   ))}
                 </tr>
@@ -172,12 +184,18 @@ export default function RoofingComparison() {
                 </div>
                 <ul className="divide-y divide-border bg-card">
                   {FEATURES.map((feat, i) => (
-                    <li key={feat} className="flex items-center gap-3 px-3 py-2.5">
+                    <li key={featureKey(feat, i)} className="flex items-center gap-3 px-3 py-2.5">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-brand-red text-brand-red-foreground text-xs font-bold">
                         {i + 1}
                       </span>
-                      <span className="flex-1 text-sm font-semibold">{feat}</span>
-                      <CheckBox checked={isChecked(i, t.key)} onClick={() => toggle(i, t.key)} />
+                      <span className="flex-1 text-sm font-semibold">{featureLabel(feat)}</span>
+                      {isTierLabel(feat) ? (
+                        <span className="text-xs font-bold bg-brand-red/10 text-brand-red px-2 py-1 rounded">
+                          {feat.tiers[t.key]}
+                        </span>
+                      ) : (
+                        <CheckBox checked={isChecked(i, t.key)} onClick={() => toggle(i, t.key)} />
+                      )}
                     </li>
                   ))}
                 </ul>
