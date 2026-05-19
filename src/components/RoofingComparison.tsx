@@ -15,9 +15,11 @@ const STORAGE_KEY = "klaus-roofing-comparison-v1";
 const PRICE_KEY = "klaus-roofing-prices-v1";
 
 export default function RoofingComparison() {
+  const [FEATURES] = useFeatures();
   const [checks, setChecks] = useState<Record<string, boolean>>({});
   const [prices, setPrices] = useState<Record<Tier, string>>({ best: "", better: "", good: "" });
   const [calcTier, setCalcTier] = useState<Tier | null>(null);
+
 
   useEffect(() => {
     try {
