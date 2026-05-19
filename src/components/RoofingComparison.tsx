@@ -1,23 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Star, Award, CheckCircle2, RotateCcw, Calculator, X } from "lucide-react";
+import { useFeatures } from "@/lib/features-store";
 
 type Tier = "best" | "better" | "good";
 
-const FEATURES = [
-  "IKO Nordic Class 4 Shingles",
-  "IKO Dynasty Class 3 Shingles",
-  "IKO Cambridge Class 2 Shingles",
-  "Replace Rotted or Damaged Roof Decking",
-  "Back-Nail Entire Roof Deck",
-  "Sealoron XT Ice & Water Barrier",
-  "Generic Ice & Water Barrier",
-  "Sealoron XT Roof Deck Tape",
-  "Velora One Synthetic Underlayment",
-  "Generic Synthetic Underlayment",
-  "50-Year No-Leak Warranty",
-  "5-Year Workmanship Warranty",
-  "1-Year Workmanship Warranty",
-];
 
 const TIERS: { key: Tier; label: string; icon: typeof Star; colorClass: string; tagline: string }[] = [
   { key: "best", label: "Best", icon: Star, colorClass: "bg-brand-red text-brand-red-foreground", tagline: "Maximum Protection. Maximum Peace of Mind." },
