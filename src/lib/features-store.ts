@@ -14,9 +14,7 @@ export const DEFAULT_FEATURES: FeatureItem[] = [
   "Sealoron XT Roof Deck Tape",
   "Velora One Synthetic Underlayment",
   "Generic Synthetic Underlayment",
-  "50-Year No-Leak Warranty",
-  "5-Year Workmanship Warranty",
-  "1-Year Workmanship Warranty",
+  { label: "No-Leak Warranty", tiers: { best: "50 Year", better: "5 Year", good: "1 Year" } },
 ];
 
 export const FEATURES_KEY = "klaus-roofing-features-v1";
