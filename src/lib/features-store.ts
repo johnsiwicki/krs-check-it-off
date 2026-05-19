@@ -17,7 +17,7 @@ export const DEFAULT_FEATURES: FeatureItem[] = [
   { label: "Warranty", tiers: { best: "50 Year", better: "5 Year", good: "1 Year" } },
 ];
 
-export const FEATURES_KEY = "klaus-roofing-features-v1";
+export const FEATURES_KEY = "klaus-roofing-features-v2";
 
 function isFeatureItem(v: unknown): v is FeatureItem {
   if (typeof v === "string") return true;
