@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Star, Award, CheckCircle2, RotateCcw } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Star, Award, CheckCircle2, RotateCcw, Calculator, X } from "lucide-react";
 
 type Tier = "best" | "better" | "good";
 
@@ -26,14 +26,19 @@ const TIERS: { key: Tier; label: string; icon: typeof Star; colorClass: string; 
 ];
 
 const STORAGE_KEY = "klaus-roofing-comparison-v1";
+const PRICE_KEY = "klaus-roofing-prices-v1";
 
 export default function RoofingComparison() {
   const [checks, setChecks] = useState<Record<string, boolean>>({});
+  const [prices, setPrices] = useState<Record<Tier, string>>({ best: "", better: "", good: "" });
+  const [calcTier, setCalcTier] = useState<Tier | null>(null);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setChecks(JSON.parse(raw));
+      const p = localStorage.getItem(PRICE_KEY);
+      if (p) setPrices(JSON.parse(p));
     } catch {}
   }, []);
 
@@ -41,12 +46,19 @@ export default function RoofingComparison() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(checks)); } catch {}
   }, [checks]);
 
+  useEffect(() => {
+    try { localStorage.setItem(PRICE_KEY, JSON.stringify(prices)); } catch {}
+  }, [prices]);
+
   const toggle = (row: number, tier: Tier) => {
     const k = `${row}:${tier}`;
     setChecks((p) => ({ ...p, [k]: !p[k] }));
   };
 
   const isChecked = (row: number, tier: Tier) => !!checks[`${row}:${tier}`];
+
+  const setPrice = (tier: Tier, v: string) =>
+    setPrices((p) => ({ ...p, [tier]: v.replace(/[^\d.]/g, "") }));
 
   return (
     <div className="min-h-screen bg-background py-6 px-3 sm:py-10 sm:px-6">
@@ -72,10 +84,10 @@ export default function RoofingComparison() {
         {/* Reset */}
         <div className="flex justify-end mb-3">
           <button
-            onClick={() => setChecks({})}
+            onClick={() => { setChecks({}); setPrices({ best: "", better: "", good: "" }); }}
             className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
           >
-            <RotateCcw className="h-3.5 w-3.5" /> Reset selections
+            <RotateCcw className="h-3.5 w-3.5" /> Reset
           </button>
         </div>
 
@@ -105,7 +117,7 @@ export default function RoofingComparison() {
                   <td className="bg-brand-red text-brand-red-foreground font-bold text-center w-12 px-2 py-3">
                     {i + 1}
                   </td>
-                  <td className={`px-4 py-3 font-semibold text-sm uppercase tracking-wide ${i % 2 === 0 ? "bg-brand-dark text-brand-dark-foreground" : "bg-brand-dark/90 text-brand-dark-foreground"}`}>
+                  <td className="px-4 py-3 font-semibold text-sm uppercase tracking-wide bg-brand-dark text-brand-dark-foreground">
                     {feat}
                   </td>
                   {TIERS.map((t) => (
@@ -115,6 +127,33 @@ export default function RoofingComparison() {
                   ))}
                 </tr>
               ))}
+              {/* Price row */}
+              <tr className="border-t-2 border-brand-red">
+                <td className="bg-brand-red text-brand-red-foreground font-bold text-center px-2 py-3">$</td>
+                <td className="px-4 py-3 font-bold text-sm uppercase tracking-wide bg-brand-dark text-brand-dark-foreground">
+                  Total Price
+                </td>
+                {TIERS.map((t) => (
+                  <td key={t.key} className="px-3 py-3 border-l border-brand-red/30 bg-background">
+                    <PriceInput value={prices[t.key]} onChange={(v) => setPrice(t.key, v)} />
+                  </td>
+                ))}
+              </tr>
+              {/* Payment options row */}
+              <tr className="border-t border-brand-red/30">
+                <td colSpan={2} className="bg-background"></td>
+                {TIERS.map((t) => (
+                  <td key={t.key} className="px-3 py-3 border-l border-brand-red/30 bg-background text-center">
+                    <button
+                      onClick={() => setCalcTier(t.key)}
+                      disabled={!prices[t.key]}
+                      className="inline-flex items-center justify-center gap-2 w-full rounded-md bg-brand-red text-brand-red-foreground text-xs font-bold uppercase tracking-wide px-3 py-2 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                    >
+                      <Calculator className="h-3.5 w-3.5" /> Payment Options
+                    </button>
+                  </td>
+                ))}
+              </tr>
               <tr>
                 <td colSpan={2} className="bg-background"></td>
                 {TIERS.map((t) => {
@@ -154,6 +193,21 @@ export default function RoofingComparison() {
                     </li>
                   ))}
                 </ul>
+                <div className="bg-card px-4 py-3 border-t border-border space-y-3">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-1 block">
+                      Total Price
+                    </label>
+                    <PriceInput value={prices[t.key]} onChange={(v) => setPrice(t.key, v)} />
+                  </div>
+                  <button
+                    onClick={() => setCalcTier(t.key)}
+                    disabled={!prices[t.key]}
+                    className="inline-flex items-center justify-center gap-2 w-full rounded-md bg-brand-red text-brand-red-foreground text-sm font-bold uppercase tracking-wide px-3 py-2.5 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                  >
+                    <Calculator className="h-4 w-4" /> Payment Options
+                  </button>
+                </div>
                 <div className={`${t.colorClass} px-4 py-3 text-xs font-bold uppercase text-center`}>
                   {t.tagline}
                 </div>
@@ -162,6 +216,14 @@ export default function RoofingComparison() {
           })}
         </div>
       </div>
+
+      {calcTier && (
+        <PaymentCalculator
+          tier={TIERS.find((t) => t.key === calcTier)!}
+          price={parseFloat(prices[calcTier]) || 0}
+          onClose={() => setCalcTier(null)}
+        />
+      )}
     </div>
   );
 }
@@ -184,5 +246,154 @@ function CheckBox({ checked, onClick }: { checked: boolean; onClick: () => void 
         </svg>
       )}
     </button>
+  );
+}
+
+function PriceInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="relative">
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">$</span>
+      <input
+        type="text"
+        inputMode="decimal"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="0.00"
+        className="w-full rounded-md border-2 border-brand-red/40 bg-background pl-7 pr-3 py-2 text-sm font-bold text-foreground focus:outline-none focus:border-brand-red"
+      />
+    </div>
+  );
+}
+
+function PaymentCalculator({
+  tier,
+  price,
+  onClose,
+}: {
+  tier: { key: Tier; label: string; colorClass: string };
+  price: number;
+  onClose: () => void;
+}) {
+  const [downPayment, setDownPayment] = useState(0);
+  const [apr, setApr] = useState(8.99);
+  const [termMonths, setTermMonths] = useState(60);
+
+  const financed = Math.max(0, price - downPayment);
+
+  const monthly = useMemo(() => {
+    if (financed <= 0 || termMonths <= 0) return 0;
+    const r = apr / 100 / 12;
+    if (r === 0) return financed / termMonths;
+    return (financed * r) / (1 - Math.pow(1 + r, -termMonths));
+  }, [financed, apr, termMonths]);
+
+  const totalPaid = monthly * termMonths + downPayment;
+  const totalInterest = Math.max(0, totalPaid - price);
+
+  const fmt = (n: number) =>
+    n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-md rounded-xl border-2 border-brand-red bg-background shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={`${tier.colorClass} px-5 py-4 rounded-t-lg flex items-center justify-between`}>
+          <div>
+            <div className="text-xs font-bold uppercase tracking-widest opacity-80">{tier.label} Plan</div>
+            <div className="text-xl font-extrabold uppercase tracking-tight">Payment Options</div>
+          </div>
+          <button onClick={onClose} className="p-1 hover:opacity-70 transition-opacity">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <div className="rounded-lg bg-muted px-4 py-3 flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Total Price</span>
+            <span className="text-lg font-extrabold">{fmt(price)}</span>
+          </div>
+
+          <Field label="Down Payment">
+            <input
+              type="number"
+              min={0}
+              max={price}
+              value={downPayment}
+              onChange={(e) => setDownPayment(Math.max(0, Math.min(price, parseFloat(e.target.value) || 0)))}
+              className="w-full rounded-md border-2 border-brand-red/40 bg-background px-3 py-2 text-sm font-bold focus:outline-none focus:border-brand-red"
+            />
+          </Field>
+
+          <Field label={`Interest Rate (APR): ${apr.toFixed(2)}%`}>
+            <input
+              type="range"
+              min={0}
+              max={29.99}
+              step={0.25}
+              value={apr}
+              onChange={(e) => setApr(parseFloat(e.target.value))}
+              className="w-full accent-brand-red"
+            />
+          </Field>
+
+          <Field label="Term">
+            <div className="grid grid-cols-4 gap-2">
+              {[24, 36, 60, 120].map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setTermMonths(m)}
+                  className={`rounded-md px-2 py-2 text-xs font-bold uppercase border-2 transition-colors ${
+                    termMonths === m
+                      ? "bg-brand-red border-brand-red text-brand-red-foreground"
+                      : "border-brand-red/40 text-foreground hover:border-brand-red"
+                  }`}
+                >
+                  {m / 12}yr
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          <div className="rounded-lg bg-brand-dark text-brand-dark-foreground p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wide opacity-80">Estimated Monthly</span>
+              <span className="text-2xl font-extrabold text-brand-red">{fmt(monthly)}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs opacity-80">
+              <span>Amount Financed</span>
+              <span className="font-semibold">{fmt(financed)}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs opacity-80">
+              <span>Total Interest</span>
+              <span className="font-semibold">{fmt(totalInterest)}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs opacity-80">
+              <span>Total of Payments</span>
+              <span className="font-semibold">{fmt(totalPaid)}</span>
+            </div>
+          </div>
+
+          <p className="text-[10px] text-muted-foreground leading-snug">
+            Estimates only. Actual rates and terms depend on credit approval and lender.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-1.5 block">
+        {label}
+      </label>
+      {children}
+    </div>
   );
 }
