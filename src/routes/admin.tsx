@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, GripVertical, Plus, RotateCcw, Trash2 } from "lucide-react";
-import { DEFAULT_FEATURES, loadFeatures, saveFeatures } from "@/lib/features-store";
+import { DEFAULT_FEATURES, loadFeatures, saveFeatures, type FeatureItem, type Tier } from "@/lib/features-store";
+
+const TIERS: Tier[] = ["best", "better", "good"];
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -14,20 +16,20 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminPage() {
-  const [features, setFeatures] = useState<string[]>([]);
+  const [features, setFeatures] = useState<FeatureItem[]>([]);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => { setFeatures(loadFeatures()); }, []);
 
-  const update = (next: string[]) => {
+  const update = (next: FeatureItem[]) => {
     setFeatures(next);
     saveFeatures(next);
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1200);
   };
 
-  const setItem = (i: number, v: string) => {
+  const setItem = (i: number, v: FeatureItem) => {
     const next = [...features]; next[i] = v; update(next);
   };
   const remove = (i: number) => update(features.filter((_, idx) => idx !== i));
@@ -89,27 +91,58 @@ function AdminPage() {
                 onDragStart={() => onDragStart(i)}
                 onDragOver={(e) => onDragOver(e, i)}
                 onDragEnd={onDragEnd}
-                className={`flex items-center gap-2 px-3 py-2 ${dragIdx === i ? "opacity-50" : ""}`}
+                className={`px-3 py-3 ${dragIdx === i ? "opacity-50" : ""}`}
               >
-                <span className="cursor-grab text-muted-foreground hover:text-foreground touch-none">
-                  <GripVertical className="h-4 w-4" />
-                </span>
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-brand-red text-brand-red-foreground text-xs font-bold">
-                  {i + 1}
-                </span>
-                <input
-                  type="text"
-                  value={feat}
-                  onChange={(e) => setItem(i, e.target.value)}
-                  className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold focus:outline-none focus:border-brand-red"
-                />
-                <button
-                  onClick={() => remove(i)}
-                  aria-label="Remove"
-                  className="p-2 text-muted-foreground hover:text-brand-red transition-colors"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="cursor-grab text-muted-foreground hover:text-foreground touch-none">
+                    <GripVertical className="h-4 w-4" />
+                  </span>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-brand-red text-brand-red-foreground text-xs font-bold">
+                    {i + 1}
+                  </span>
+                  <button
+                    onClick={() => remove(i)}
+                    aria-label="Remove"
+                    className="ml-auto p-2 text-muted-foreground hover:text-brand-red transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+                {typeof feat === "string" ? (
+                  <input
+                    type="text"
+                    value={feat}
+                    onChange={(e) => setItem(i, e.target.value)}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold focus:outline-none focus:border-brand-red"
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={feat.label}
+                      onChange={(e) => setItem(i, { ...feat, label: e.target.value })}
+                      placeholder="Feature label"
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold focus:outline-none focus:border-brand-red"
+                    />
+                    <div className="grid grid-cols-3 gap-2">
+                      {TIERS.map((tier) => (
+                        <div key={tier}>
+                          <label className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground mb-0.5 block">
+                            {tier}
+                          </label>
+                          <input
+                            type="text"
+                            value={feat.tiers[tier]}
+                            onChange={(e) =>
+                              setItem(i, { ...feat, tiers: { ...feat.tiers, [tier]: e.target.value } })
+                            }
+                            className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-red"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
             {features.length === 0 && (
