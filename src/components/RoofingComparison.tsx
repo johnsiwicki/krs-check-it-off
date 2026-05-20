@@ -126,7 +126,7 @@ export default function RoofingComparison() {
                               setInfoModal({
                                 label: feat.label,
                                 tierLabel: feat.tiers[t.key],
-                                text: feat.info[t.key],
+                                text: feat.info?.[t.key] ?? "",
                               })
                             }
                             className="inline-flex items-center gap-1 text-sm font-bold text-brand-red hover:underline cursor-pointer"
