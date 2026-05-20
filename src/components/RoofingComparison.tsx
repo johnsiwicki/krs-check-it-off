@@ -283,6 +283,7 @@ function PaymentCalculator({
   const [downPayment, setDownPayment] = useState(0);
   const [apr, setApr] = useState(8.99);
   const [termMonths, setTermMonths] = useState(60);
+  const [aprInput, setAprInput] = useState("8.99");
 
   const financed = Math.max(0, price - downPayment);
 
