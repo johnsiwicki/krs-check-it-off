@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Star, Award, CheckCircle2, RotateCcw, Calculator, X, Minus, Plus, Info } from "lucide-react";
-import { useFeatures, type FeatureItem, type Tier } from "@/lib/features-store";
+import { useFeatures, getFeatureDefault, isTierLabelFeature, type FeatureItem, type Tier } from "@/lib/features-store";
 
 const TIERS: { key: Tier; label: string; icon: typeof Star; colorClass: string; tagline: string }[] = [
   { key: "best", label: "Best", icon: Star, colorClass: "bg-brand-red text-brand-red-foreground", tagline: "Maximum Protection. Maximum Peace of Mind." },
@@ -20,8 +20,9 @@ function featureKey(feat: FeatureItem, index: number): string {
 }
 
 function isTierLabel(feat: FeatureItem): feat is { label: string; tiers: Record<Tier, string>; info?: Record<Tier, string> } {
-  return typeof feat !== "string";
+  return isTierLabelFeature(feat);
 }
+
 
 export default function RoofingComparison() {
   const [FEATURES] = useFeatures();
