@@ -261,6 +261,14 @@ export default function RoofingComparison() {
           onClose={() => setCalcTier(null)}
         />
       )}
+
+      {infoModal && (
+        <InfoModal
+          title={`${infoModal.label}: ${infoModal.tierLabel}`}
+          text={infoModal.text}
+          onClose={() => setInfoModal(null)}
+        />
+      )}
     </div>
   );
 }
