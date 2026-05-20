@@ -28,6 +28,7 @@ export default function RoofingComparison() {
   const [checks, setChecks] = useState<Record<string, boolean>>({});
   const [prices, setPrices] = useState<Record<Tier, string>>({ best: "", better: "", good: "" });
   const [calcTier, setCalcTier] = useState<Tier | null>(null);
+  const [infoModal, setInfoModal] = useState<{ label: string; tierLabel: string; text: string } | null>(null);
 
   useEffect(() => {
     try {
