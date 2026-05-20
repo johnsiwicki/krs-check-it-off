@@ -19,7 +19,7 @@ function featureKey(feat: FeatureItem, index: number): string {
   return typeof feat === "string" ? feat : `${feat.label}--${index}`;
 }
 
-function isTierLabel(feat: FeatureItem): feat is { label: string; tiers: Record<Tier, string> } {
+function isTierLabel(feat: FeatureItem): feat is { label: string; tiers: Record<Tier, string>; info?: Record<Tier, string> } {
   return typeof feat !== "string";
 }
 
