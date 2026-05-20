@@ -150,9 +150,14 @@ function AdminPage() {
                           <textarea
                             value={feat.info?.[tier] ?? ""}
                             onChange={(e) => {
-                              const nextInfo = { ...feat.info, [tier]: e.target.value };
-                              if (!e.target.value) delete (nextInfo as Record<string, string>)[tier];
-                              setItem(i, { ...feat, info: Object.keys(nextInfo).length ? nextInfo : undefined });
+                              const base: Record<Tier, string> = {
+                                best: feat.info?.best ?? "",
+                                better: feat.info?.better ?? "",
+                                good: feat.info?.good ?? "",
+                              };
+                              base[tier] = e.target.value;
+                              const hasAny = Object.values(base).some((v) => v.trim() !== "");
+                              setItem(i, { ...feat, info: hasAny ? base : undefined });
                             }}
                             rows={2}
                             placeholder="Popup description..."
