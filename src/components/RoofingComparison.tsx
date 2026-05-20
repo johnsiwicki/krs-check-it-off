@@ -538,3 +538,24 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+
+function InfoModal({ title, text, onClose }: { title: string; text: string; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div
+        className="relative w-full max-w-md rounded-xl border-2 border-brand-red bg-background shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="bg-brand-dark text-brand-dark-foreground px-5 py-4 rounded-t-lg flex items-center justify-between">
+          <div className="text-xl font-extrabold uppercase tracking-tight">{title}</div>
+          <button onClick={onClose} className="p-1 hover:opacity-70 transition-opacity">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="p-5">
+          <p className="text-sm text-foreground leading-relaxed">{text}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
