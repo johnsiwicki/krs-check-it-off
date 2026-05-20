@@ -120,7 +120,22 @@ export default function RoofingComparison() {
                   {TIERS.map((t) => (
                     <td key={t.key} className="text-center px-4 py-3 border-l border-brand-red/30">
                       {isTierLabel(feat) ? (
-                        <span className="text-sm font-bold">{feat.tiers[t.key]}</span>
+                        feat.info?.[t.key] ? (
+                          <button
+                            onClick={() =>
+                              setInfoModal({
+                                label: feat.label,
+                                tierLabel: feat.tiers[t.key],
+                                text: feat.info[t.key],
+                              })
+                            }
+                            className="inline-flex items-center gap-1 text-sm font-bold text-brand-red hover:underline cursor-pointer"
+                          >
+                            {feat.tiers[t.key]} <Info className="h-3.5 w-3.5" />
+                          </button>
+                        ) : (
+                          <span className="text-sm font-bold">{feat.tiers[t.key]}</span>
+                        )
                       ) : (
                         <CheckBox checked={isChecked(i, t.key)} onClick={() => toggle(i, t.key)} />
                       )}
