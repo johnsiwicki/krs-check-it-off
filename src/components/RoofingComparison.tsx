@@ -300,6 +300,28 @@ function PaymentCalculator({
   const fmt = (n: number) =>
     n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
 
+  const adjustDown = (delta: number) => {
+    setDownPayment((p) => Math.max(0, Math.min(price, Math.round((p + delta) / 100) * 100)));
+  };
+
+  const adjustApr = (delta: number) => {
+    setApr((p) => {
+      const next = Math.max(0, Math.min(29.99, Math.round((p + delta) * 100) / 100));
+      setAprInput(next.toFixed(2));
+      return next;
+    });
+  };
+
+  const handleAprInput = (val: string) => {
+    setAprInput(val);
+    const n = parseFloat(val);
+    if (!isNaN(n)) {
+      setApr(Math.max(0, Math.min(29.99, Math.round(n * 100) / 100)));
+    }
+  };
+
+  const pct = (n: number) => Math.max(0, Math.min(price, Math.round(price * n)));
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
@@ -319,32 +341,105 @@ function PaymentCalculator({
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-5">
           <div className="rounded-lg bg-muted px-4 py-3 flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Total Price</span>
             <span className="text-lg font-extrabold">{fmt(price)}</span>
           </div>
 
           <Field label="Down Payment">
-            <input
-              type="number"
-              min={0}
-              max={price}
-              value={downPayment}
-              onChange={(e) => setDownPayment(Math.max(0, Math.min(price, parseFloat(e.target.value) || 0)))}
-              className="w-full rounded-md border-2 border-brand-red/40 bg-background px-3 py-2 text-sm font-bold focus:outline-none focus:border-brand-red"
-            />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => adjustDown(-500)}
+                className="shrink-0 h-11 w-11 rounded-lg border-2 border-brand-red/40 flex items-center justify-center hover:border-brand-red active:bg-brand-red/10 transition-colors"
+                aria-label="Decrease down payment"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base font-bold text-muted-foreground">$</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={downPayment ? downPayment.toLocaleString("en-US") : ""}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^\d.]/g, "");
+                    const n = parseFloat(raw) || 0;
+                    setDownPayment(Math.max(0, Math.min(price, n)));
+                  }}
+                  className="w-full h-11 rounded-lg border-2 border-brand-red/40 bg-background pl-8 pr-3 text-base font-bold text-center focus:outline-none focus:border-brand-red"
+                />
+              </div>
+              <button
+                onClick={() => adjustDown(500)}
+                className="shrink-0 h-11 w-11 rounded-lg border-2 border-brand-red/40 flex items-center justify-center hover:border-brand-red active:bg-brand-red/10 transition-colors"
+                aria-label="Increase down payment"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex gap-2 mt-2">
+              {[
+                { label: "0%", val: pct(0) },
+                { label: "10%", val: pct(0.1) },
+                { label: "20%", val: pct(0.2) },
+                { label: "50%", val: pct(0.5) },
+              ].map((opt) => (
+                <button
+                  key={opt.label}
+                  onClick={() => setDownPayment(opt.val)}
+                  className={`flex-1 rounded-md py-1.5 text-xs font-bold uppercase border-2 transition-colors ${
+                    downPayment === opt.val
+                      ? "bg-brand-red border-brand-red text-brand-red-foreground"
+                      : "border-brand-red/30 text-muted-foreground hover:border-brand-red hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </Field>
 
           <Field label={`Interest Rate (APR): ${apr.toFixed(2)}%`}>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => adjustApr(-0.25)}
+                className="shrink-0 h-11 w-11 rounded-lg border-2 border-brand-red/40 flex items-center justify-center hover:border-brand-red active:bg-brand-red/10 transition-colors"
+                aria-label="Decrease APR"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={aprInput}
+                  onChange={(e) => handleAprInput(e.target.value)}
+                  onBlur={() => setAprInput(apr.toFixed(2))}
+                  className="w-full h-11 rounded-lg border-2 border-brand-red/40 bg-background px-3 text-base font-bold text-center focus:outline-none focus:border-brand-red"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-base font-bold text-muted-foreground">%</span>
+              </div>
+              <button
+                onClick={() => adjustApr(0.25)}
+                className="shrink-0 h-11 w-11 rounded-lg border-2 border-brand-red/40 flex items-center justify-center hover:border-brand-red active:bg-brand-red/10 transition-colors"
+                aria-label="Increase APR"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
             <input
               type="range"
               min={0}
               max={29.99}
               step={0.25}
               value={apr}
-              onChange={(e) => setApr(parseFloat(e.target.value))}
-              className="w-full accent-brand-red"
+              onChange={(e) => {
+                const n = parseFloat(e.target.value);
+                setApr(n);
+                setAprInput(n.toFixed(2));
+              }}
+              className="w-full accent-brand-red mt-2 h-2"
             />
           </Field>
 
@@ -354,7 +449,7 @@ function PaymentCalculator({
                 <button
                   key={m}
                   onClick={() => setTermMonths(m)}
-                  className={`rounded-md px-2 py-2 text-xs font-bold uppercase border-2 transition-colors ${
+                  className={`rounded-lg px-2 py-3 text-sm font-bold uppercase border-2 transition-colors ${
                     termMonths === m
                       ? "bg-brand-red border-brand-red text-brand-red-foreground"
                       : "border-brand-red/40 text-foreground hover:border-brand-red"
