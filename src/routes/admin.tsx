@@ -215,3 +215,36 @@ function AdminPage() {
     </div>
   );
 }
+
+function DefaultChecks({
+  defaults,
+  onChange,
+}: {
+  defaults: Record<Tier, boolean>;
+  onChange: (d: Record<Tier, boolean>) => void;
+}) {
+  return (
+    <div>
+      <label className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground mb-1 block">
+        Checked by default
+      </label>
+      <div className="grid grid-cols-3 gap-2">
+        {TIERS.map((tier) => (
+          <label
+            key={tier}
+            className="flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1.5 cursor-pointer hover:border-brand-red transition-colors"
+          >
+            <input
+              type="checkbox"
+              checked={defaults[tier]}
+              onChange={(e) => onChange({ ...defaults, [tier]: e.target.checked })}
+              className="h-4 w-4 accent-brand-red cursor-pointer"
+            />
+            <span className="text-xs font-bold uppercase tracking-wide">{tier}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
