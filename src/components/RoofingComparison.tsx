@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Star, Award, CheckCircle2, RotateCcw, Calculator, X } from "lucide-react";
+import { Star, Award, CheckCircle2, RotateCcw, Calculator, X, Minus, Plus } from "lucide-react";
 import { useFeatures, type FeatureItem, type Tier } from "@/lib/features-store";
 
 const TIERS: { key: Tier; label: string; icon: typeof Star; colorClass: string; tagline: string }[] = [
