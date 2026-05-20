@@ -50,10 +50,13 @@ export default function RoofingComparison() {
 
   const toggle = (row: number, tier: Tier) => {
     const k = `${row}:${tier}`;
-    setChecks((p) => ({ ...p, [k]: !p[k] }));
+    const current = checks[k] ?? getFeatureDefault(FEATURES[row], tier);
+    setChecks((p) => ({ ...p, [k]: !current }));
   };
 
-  const isChecked = (row: number, tier: Tier) => !!checks[`${row}:${tier}`];
+  const isChecked = (row: number, tier: Tier) =>
+    checks[`${row}:${tier}`] ?? getFeatureDefault(FEATURES[row], tier);
+
 
   const setPrice = (tier: Tier, v: string) =>
     setPrices((p) => ({ ...p, [tier]: v.replace(/[^\d.]/g, "") }));
