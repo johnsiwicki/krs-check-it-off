@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, GripVertical, Plus, RotateCcw, Trash2 } from "lucide-react";
-import { DEFAULT_FEATURES, loadFeatures, saveFeatures, type FeatureItem, type Tier } from "@/lib/features-store";
+import { DEFAULT_FEATURES, loadFeatures, saveFeatures, isTierLabelFeature, type FeatureItem, type Tier } from "@/lib/features-store";
 
 const TIERS: Tier[] = ["best", "better", "good"];
 
@@ -109,13 +109,19 @@ function AdminPage() {
                   </button>
                 </div>
                 {typeof feat === "string" ? (
-                  <input
-                    type="text"
-                    value={feat}
-                    onChange={(e) => setItem(i, e.target.value)}
-                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold focus:outline-none focus:border-brand-red"
-                  />
-                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={feat}
+                      onChange={(e) => setItem(i, e.target.value)}
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold focus:outline-none focus:border-brand-red"
+                    />
+                    <DefaultChecks
+                      defaults={{ best: false, better: false, good: false }}
+                      onChange={(d) => setItem(i, { label: feat, defaults: d })}
+                    />
+                  </div>
+                ) : isTierLabelFeature(feat) ? (
                   <div className="space-y-2">
                     <input
                       type="text"
@@ -167,7 +173,22 @@ function AdminPage() {
                       ))}
                     </div>
                   </div>
+                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={feat.label}
+                      onChange={(e) => setItem(i, { ...feat, label: e.target.value })}
+                      placeholder="Feature label"
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold focus:outline-none focus:border-brand-red"
+                    />
+                    <DefaultChecks
+                      defaults={feat.defaults}
+                      onChange={(d) => setItem(i, { ...feat, defaults: d })}
+                    />
+                  </div>
                 )}
+
               </li>
             ))}
             {features.length === 0 && (
@@ -194,3 +215,36 @@ function AdminPage() {
     </div>
   );
 }
+
+function DefaultChecks({
+  defaults,
+  onChange,
+}: {
+  defaults: Record<Tier, boolean>;
+  onChange: (d: Record<Tier, boolean>) => void;
+}) {
+  return (
+    <div>
+      <label className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground mb-1 block">
+        Checked by default
+      </label>
+      <div className="grid grid-cols-3 gap-2">
+        {TIERS.map((tier) => (
+          <label
+            key={tier}
+            className="flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1.5 cursor-pointer hover:border-brand-red transition-colors"
+          >
+            <input
+              type="checkbox"
+              checked={defaults[tier]}
+              onChange={(e) => onChange({ ...defaults, [tier]: e.target.checked })}
+              className="h-4 w-4 accent-brand-red cursor-pointer"
+            />
+            <span className="text-xs font-bold uppercase tracking-wide">{tier}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+

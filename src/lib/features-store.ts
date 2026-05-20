@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
 
 export type Tier = "best" | "better" | "good";
-export type FeatureItem =
-  | string
-  | { label: string; tiers: Record<Tier, string>; info?: Record<Tier, string> };
+export type TierFeature = {
+  label: string;
+  tiers: Record<Tier, string>;
+  info?: Record<Tier, string>;
+};
+export type CheckFeature = {
+  label: string;
+  defaults: Record<Tier, boolean>;
+};
+export type FeatureItem = string | TierFeature | CheckFeature;
 
 export const DEFAULT_FEATURES: FeatureItem[] = [
   {
@@ -15,20 +22,19 @@ export const DEFAULT_FEATURES: FeatureItem[] = [
       good: "Standard impact resistance that meets code requirements. Class 2 shingles handle smaller hail and typical weather reliably. A solid, budget-friendly choice for homeowners who need dependable basic protection.",
     },
   },
-  "Replace Rotted or Damaged Roof Decking",
-  "Back-Nail Entire Roof Deck",
-  "Sealoron XT Ice & Water Barrier",
-  "Generic Ice & Water Barrier",
-  "Sealoron XT Roof Deck Tape",
-  "Velora One Synthetic Underlayment",
-  "Generic Synthetic Underlayment",
+  { label: "Replace Rotted or Damaged Roof Decking", defaults: { best: true, better: true, good: true } },
+  { label: "Back-Nail Entire Roof Deck", defaults: { best: true, better: false, good: false } },
+  { label: "Sealoron XT Ice & Water Barrier", defaults: { best: true, better: false, good: false } },
+  { label: "Generic Ice & Water Barrier", defaults: { best: false, better: true, good: true } },
+  { label: "Sealoron XT Roof Deck Tape", defaults: { best: true, better: false, good: false } },
+  { label: "Velora One Synthetic Underlayment", defaults: { best: true, better: true, good: false } },
+  { label: "Generic Synthetic Underlayment", defaults: { best: false, better: false, good: true } },
   { label: "Warranty", tiers: { best: "50 Year", better: "5 Year", good: "1 Year" } },
 ];
 
-export const FEATURES_KEY = "klaus-roofing-features-v3";
+export const FEATURES_KEY = "klaus-roofing-features-v4";
 
-function isFeatureItem(v: unknown): v is FeatureItem {
-  if (typeof v === "string") return true;
+function isTierFeature(v: unknown): v is TierFeature {
   if (typeof v !== "object" || v === null) return false;
   const obj = v as Record<string, unknown>;
   if (typeof obj.label !== "string") return false;
@@ -51,6 +57,30 @@ function isFeatureItem(v: unknown): v is FeatureItem {
       return false;
   }
   return true;
+}
+
+function isCheckFeature(v: unknown): v is CheckFeature {
+  if (typeof v !== "object" || v === null) return false;
+  const obj = v as Record<string, unknown>;
+  if (typeof obj.label !== "string") return false;
+  if (typeof obj.defaults !== "object" || obj.defaults === null) return false;
+  const d = obj.defaults as Record<string, unknown>;
+  return typeof d.best === "boolean" && typeof d.better === "boolean" && typeof d.good === "boolean";
+}
+
+function isFeatureItem(v: unknown): v is FeatureItem {
+  if (typeof v === "string") return true;
+  return isTierFeature(v) || isCheckFeature(v);
+}
+
+export function isTierLabelFeature(feat: FeatureItem): feat is TierFeature {
+  return typeof feat !== "string" && "tiers" in feat;
+}
+
+export function getFeatureDefault(feat: FeatureItem, tier: Tier): boolean {
+  if (typeof feat === "string") return false;
+  if (isTierLabelFeature(feat)) return false;
+  return feat.defaults[tier];
 }
 
 const listeners = new Set<() => void>();
