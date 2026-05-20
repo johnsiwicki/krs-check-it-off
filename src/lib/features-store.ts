@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 export type Tier = "best" | "better" | "good";
 export type FeatureItem =
   | string
-  | { label: string; tiers: Record<Tier, string> };
+  | { label: string; tiers: Record<Tier, string>; info?: Record<Tier, string> };
 
 export const DEFAULT_FEATURES: FeatureItem[] = [
   { label: "Shingles", tiers: { best: "Class 4", better: "Class 3", good: "Class 2" } },
