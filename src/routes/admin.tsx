@@ -109,13 +109,19 @@ function AdminPage() {
                   </button>
                 </div>
                 {typeof feat === "string" ? (
-                  <input
-                    type="text"
-                    value={feat}
-                    onChange={(e) => setItem(i, e.target.value)}
-                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold focus:outline-none focus:border-brand-red"
-                  />
-                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={feat}
+                      onChange={(e) => setItem(i, e.target.value)}
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold focus:outline-none focus:border-brand-red"
+                    />
+                    <DefaultChecks
+                      defaults={{ best: false, better: false, good: false }}
+                      onChange={(d) => setItem(i, { label: feat, defaults: d })}
+                    />
+                  </div>
+                ) : isTierLabelFeature(feat) ? (
                   <div className="space-y-2">
                     <input
                       type="text"
@@ -167,7 +173,22 @@ function AdminPage() {
                       ))}
                     </div>
                   </div>
+                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={feat.label}
+                      onChange={(e) => setItem(i, { ...feat, label: e.target.value })}
+                      placeholder="Feature label"
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-semibold focus:outline-none focus:border-brand-red"
+                    />
+                    <DefaultChecks
+                      defaults={feat.defaults}
+                      onChange={(d) => setItem(i, { ...feat, defaults: d })}
+                    />
+                  </div>
                 )}
+
               </li>
             ))}
             {features.length === 0 && (
