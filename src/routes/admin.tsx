@@ -141,6 +141,26 @@ function AdminPage() {
                         </div>
                       ))}
                     </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {TIERS.map((tier) => (
+                        <div key={tier}>
+                          <label className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground mb-0.5 block">
+                            {tier} info
+                          </label>
+                          <textarea
+                            value={feat.info?.[tier] ?? ""}
+                            onChange={(e) => {
+                              const nextInfo = { ...feat.info, [tier]: e.target.value };
+                              if (!e.target.value) delete (nextInfo as Record<string, string>)[tier];
+                              setItem(i, { ...feat, info: Object.keys(nextInfo).length ? nextInfo : undefined });
+                            }}
+                            rows={2}
+                            placeholder="Popup description..."
+                            className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs font-semibold focus:outline-none focus:border-brand-red resize-none"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </li>
