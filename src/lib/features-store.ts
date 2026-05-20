@@ -3,10 +3,18 @@ import { useEffect, useState } from "react";
 export type Tier = "best" | "better" | "good";
 export type FeatureItem =
   | string
-  | { label: string; tiers: Record<Tier, string> };
+  | { label: string; tiers: Record<Tier, string>; info?: Record<Tier, string> };
 
 export const DEFAULT_FEATURES: FeatureItem[] = [
-  { label: "Shingles", tiers: { best: "Class 4", better: "Class 3", good: "Class 2" } },
+  {
+    label: "Shingles",
+    tiers: { best: "Class 4", better: "Class 3", good: "Class 2" },
+    info: {
+      best: "The highest impact resistance rating available. Class 4 shingles withstand hail up to 2 inches in diameter and simulated impacts from 20 feet. Many insurers offer premium discounts. Maximum protection for severe weather.",
+      better: "Strong impact resistance that handles moderate hail and debris. Class 3 shingles pass rigorous testing with impacts from 17 feet. Excellent protection for most climates — a smart balance of performance and value.",
+      good: "Standard impact resistance that meets code requirements. Class 2 shingles handle smaller hail and typical weather reliably. A solid, budget-friendly choice for homeowners who need dependable basic protection.",
+    },
+  },
   "Replace Rotted or Damaged Roof Decking",
   "Back-Nail Entire Roof Deck",
   "Sealoron XT Ice & Water Barrier",
@@ -17,7 +25,7 @@ export const DEFAULT_FEATURES: FeatureItem[] = [
   { label: "Warranty", tiers: { best: "50 Year", better: "5 Year", good: "1 Year" } },
 ];
 
-export const FEATURES_KEY = "klaus-roofing-features-v2";
+export const FEATURES_KEY = "klaus-roofing-features-v3";
 
 function isFeatureItem(v: unknown): v is FeatureItem {
   if (typeof v === "string") return true;
@@ -26,11 +34,23 @@ function isFeatureItem(v: unknown): v is FeatureItem {
   if (typeof obj.label !== "string") return false;
   if (typeof obj.tiers !== "object" || obj.tiers === null) return false;
   const tiers = obj.tiers as Record<string, unknown>;
-  return (
-    typeof tiers.best === "string" &&
-    typeof tiers.better === "string" &&
-    typeof tiers.good === "string"
-  );
+  if (
+    typeof tiers.best !== "string" ||
+    typeof tiers.better !== "string" ||
+    typeof tiers.good !== "string"
+  )
+    return false;
+  if (obj.info !== undefined) {
+    if (typeof obj.info !== "object" || obj.info === null) return false;
+    const info = obj.info as Record<string, unknown>;
+    if (
+      typeof info.best !== "string" ||
+      typeof info.better !== "string" ||
+      typeof info.good !== "string"
+    )
+      return false;
+  }
+  return true;
 }
 
 const listeners = new Set<() => void>();

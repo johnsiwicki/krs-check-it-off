@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Star, Award, CheckCircle2, RotateCcw, Calculator, X, Minus, Plus } from "lucide-react";
+import { Star, Award, CheckCircle2, RotateCcw, Calculator, X, Minus, Plus, Info } from "lucide-react";
 import { useFeatures, type FeatureItem, type Tier } from "@/lib/features-store";
 
 const TIERS: { key: Tier; label: string; icon: typeof Star; colorClass: string; tagline: string }[] = [
@@ -19,7 +19,7 @@ function featureKey(feat: FeatureItem, index: number): string {
   return typeof feat === "string" ? feat : `${feat.label}--${index}`;
 }
 
-function isTierLabel(feat: FeatureItem): feat is { label: string; tiers: Record<Tier, string> } {
+function isTierLabel(feat: FeatureItem): feat is { label: string; tiers: Record<Tier, string>; info?: Record<Tier, string> } {
   return typeof feat !== "string";
 }
 
@@ -28,6 +28,7 @@ export default function RoofingComparison() {
   const [checks, setChecks] = useState<Record<string, boolean>>({});
   const [prices, setPrices] = useState<Record<Tier, string>>({ best: "", better: "", good: "" });
   const [calcTier, setCalcTier] = useState<Tier | null>(null);
+  const [infoModal, setInfoModal] = useState<{ label: string; tierLabel: string; text: string } | null>(null);
 
   useEffect(() => {
     try {
@@ -119,7 +120,22 @@ export default function RoofingComparison() {
                   {TIERS.map((t) => (
                     <td key={t.key} className="text-center px-4 py-3 border-l border-brand-red/30">
                       {isTierLabel(feat) ? (
-                        <span className="text-sm font-bold">{feat.tiers[t.key]}</span>
+                        feat.info?.[t.key] ? (
+                          <button
+                            onClick={() =>
+                              setInfoModal({
+                                label: feat.label,
+                                tierLabel: feat.tiers[t.key],
+                                text: feat.info?.[t.key] ?? "",
+                              })
+                            }
+                            className="inline-flex items-center gap-1 text-sm font-bold text-brand-red hover:underline cursor-pointer"
+                          >
+                            {feat.tiers[t.key]} <Info className="h-3.5 w-3.5" />
+                          </button>
+                        ) : (
+                          <span className="text-sm font-bold">{feat.tiers[t.key]}</span>
+                        )
                       ) : (
                         <CheckBox checked={isChecked(i, t.key)} onClick={() => toggle(i, t.key)} />
                       )}
@@ -190,9 +206,24 @@ export default function RoofingComparison() {
                       </span>
                       <span className="flex-1 text-sm font-semibold">{featureLabel(feat)}</span>
                       {isTierLabel(feat) ? (
-                        <span className="text-xs font-bold bg-brand-red/10 text-brand-red px-2 py-1 rounded">
-                          {feat.tiers[t.key]}
-                        </span>
+                        feat.info?.[t.key] ? (
+                          <button
+                            onClick={() =>
+                              setInfoModal({
+                                label: feat.label,
+                                tierLabel: feat.tiers[t.key],
+                                text: feat.info?.[t.key] ?? "",
+                              })
+                            }
+                            className="inline-flex items-center gap-1 text-xs font-bold bg-brand-red/10 text-brand-red px-2 py-1 rounded hover:bg-brand-red/20 cursor-pointer"
+                          >
+                            {feat.tiers[t.key]} <Info className="h-3 w-3" />
+                          </button>
+                        ) : (
+                          <span className="text-xs font-bold bg-brand-red/10 text-brand-red px-2 py-1 rounded">
+                            {feat.tiers[t.key]}
+                          </span>
+                        )
                       ) : (
                         <CheckBox checked={isChecked(i, t.key)} onClick={() => toggle(i, t.key)} />
                       )}
@@ -228,6 +259,14 @@ export default function RoofingComparison() {
           tier={TIERS.find((t) => t.key === calcTier)!}
           price={parseFloat(prices[calcTier]) || 0}
           onClose={() => setCalcTier(null)}
+        />
+      )}
+
+      {infoModal && (
+        <InfoModal
+          title={`${infoModal.label}: ${infoModal.tierLabel}`}
+          text={infoModal.text}
+          onClose={() => setInfoModal(null)}
         />
       )}
     </div>
@@ -496,6 +535,27 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
         {label}
       </label>
       {children}
+    </div>
+  );
+}
+
+function InfoModal({ title, text, onClose }: { title: string; text: string; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div
+        className="relative w-full max-w-md rounded-xl border-2 border-brand-red bg-background shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="bg-brand-dark text-brand-dark-foreground px-5 py-4 rounded-t-lg flex items-center justify-between">
+          <div className="text-xl font-extrabold uppercase tracking-tight">{title}</div>
+          <button onClick={onClose} className="p-1 hover:opacity-70 transition-opacity">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="p-5">
+          <p className="text-sm text-foreground leading-relaxed">{text}</p>
+        </div>
+      </div>
     </div>
   );
 }
