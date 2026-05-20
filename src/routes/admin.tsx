@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, GripVertical, Plus, RotateCcw, Trash2 } from "lucide-react";
-import { DEFAULT_FEATURES, loadFeatures, saveFeatures, type FeatureItem, type Tier } from "@/lib/features-store";
+import { DEFAULT_FEATURES, loadFeatures, saveFeatures, isTierLabelFeature, type FeatureItem, type Tier } from "@/lib/features-store";
 
 const TIERS: Tier[] = ["best", "better", "good"];
 
