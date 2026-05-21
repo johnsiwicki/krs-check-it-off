@@ -67,11 +67,13 @@ export default function RoofingComparison() {
         {/* Header */}
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
-            <div className="text-brand-red font-extrabold text-2xl sm:text-3xl tracking-tight leading-none">
-              KLAUS ROOFING
-            </div>
-            <div className="text-xs font-semibold tracking-[0.3em] text-foreground">SYSTEMS</div>
+            <img
+              src="https://cdn.treehouseinternetgroup.com/cms_images/2721/klaus-logo-no-tag2.svg"
+              alt="Klaus Roofing Systems"
+              className="h-12 sm:h-16 w-auto"
+            />
           </div>
+
           <div className="text-center sm:text-right">
             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
               ROOFING SYSTEM <span className="text-brand-red">COMPARISON</span>
