@@ -106,7 +106,19 @@ export function loadFeatures(): FeatureItem[] {
     const raw = localStorage.getItem(FEATURES_KEY);
     if (!raw) return DEFAULT_FEATURES;
     const arr = JSON.parse(raw);
-    if (Array.isArray(arr) && arr.every(isFeatureItem)) return arr;
+    if (Array.isArray(arr) && arr.every(isFeatureItem)) {
+      // Migration: backfill missing info from defaults by matching label
+      return arr.map((item) => {
+        if (typeof item === "string" || !isTierLabelFeature(item) || item.info) return item;
+        const def = DEFAULT_FEATURES.find(
+          (d) => typeof d !== "string" && isTierLabelFeature(d) && d.label === item.label,
+        );
+        if (def && typeof def !== "string" && isTierLabelFeature(def) && def.info) {
+          return { ...item, info: def.info };
+        }
+        return item;
+      });
+    }
   } catch {}
   return DEFAULT_FEATURES;
 }
