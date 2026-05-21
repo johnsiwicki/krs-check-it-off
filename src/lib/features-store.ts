@@ -29,7 +29,15 @@ export const DEFAULT_FEATURES: FeatureItem[] = [
   { label: "Sealoron XT Roof Deck Tape", defaults: { best: true, better: false, good: false } },
   { label: "Velora One Synthetic Underlayment", defaults: { best: true, better: true, good: false } },
   { label: "Generic Synthetic Underlayment", defaults: { best: false, better: false, good: true } },
-  { label: "Warranty", tiers: { best: "50 Year", better: "5 Year", good: "1 Year" } },
+  {
+    label: "Warranty",
+    tiers: { best: "50 Year", better: "5 Year", good: "1 Year" },
+    info: {
+      best: "Our top-tier 50-year warranty offers decades of peace of mind. It covers materials and workmanship for the long haul — protecting your investment against defects, leaks, and premature wear for virtually the lifetime of your home.",
+      better: "A solid 5-year warranty covering both materials and workmanship. Great middle-ground protection that guards against early failures and installation issues while keeping your project affordable.",
+      good: "A 1-year warranty covering installation defects and immediate issues. Reliable basic coverage that ensures your new roof was installed correctly and performs as expected from day one.",
+    },
+  },
 ];
 
 export const FEATURES_KEY = "klaus-roofing-features-v4";
