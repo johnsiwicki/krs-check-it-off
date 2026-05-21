@@ -3,9 +3,9 @@ import { Star, Award, CheckCircle2, RotateCcw, Calculator, X, Minus, Plus, Info 
 import { useFeatures, getFeatureDefault, isTierLabelFeature, type FeatureItem, type Tier } from "@/lib/features-store";
 
 const TIERS: { key: Tier; label: string; icon: typeof Star; colorClass: string; tagline: string }[] = [
-  { key: "best", label: "Best", icon: Star, colorClass: "bg-brand-red text-brand-red-foreground", tagline: "Maximum Protection. Maximum Peace of Mind." },
-  { key: "better", label: "Better", icon: Award, colorClass: "bg-brand-dark text-brand-dark-foreground", tagline: "Strong Performance. Solid Value." },
   { key: "good", label: "Good", icon: CheckCircle2, colorClass: "bg-brand-gray text-brand-gray-foreground", tagline: "Basic Protection. Budget Friendly." },
+  { key: "better", label: "Better", icon: Award, colorClass: "bg-brand-dark text-brand-dark-foreground", tagline: "Strong Performance. Solid Value." },
+  { key: "best", label: "Best", icon: Star, colorClass: "bg-brand-red text-brand-red-foreground", tagline: "Maximum Protection. Maximum Peace of Mind." },
 ];
 
 const STORAGE_KEY = "klaus-roofing-comparison-v2";

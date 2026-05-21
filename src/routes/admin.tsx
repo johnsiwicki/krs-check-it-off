@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, GripVertical, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { DEFAULT_FEATURES, loadFeatures, saveFeatures, isTierLabelFeature, type FeatureItem, type Tier } from "@/lib/features-store";
 
-const TIERS: Tier[] = ["best", "better", "good"];
+const TIERS: Tier[] = ["good", "better", "best"];
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
