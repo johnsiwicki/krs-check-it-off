@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Klaus Roofing Systems — Roofing System Comparison</title>
+<meta name="description" content="Compare Klaus Roofing System tiers — Good, Better, Best. Check off features to build your roof." />
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #111111;
+    --muted: #f4f4f5;
+    --muted-fg: #6b7280;
+    --border: #e5e7eb;
+    --card: #ffffff;
+    --brand-red: #c41e2a;
+    --brand-red-fg: #ffffff;
+    --brand-dark: #2b2f3a;
+    --brand-dark-fg: #ffffff;
+    --brand-gray: #8a8a8a;
+    --brand-gray-fg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  input, textarea, select { font-family: inherit; }
+  a { color: inherit; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 12px; }
+  @media (min-width: 640px) { .container { padding: 40px 24px; } }
+
+  .header { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+  @media (min-width: 640px) { .header { flex-direction: row; align-items: center; justify-content: space-between; } }
+  .logo { height: 48px; width: auto; }
+  @media (min-width: 640px) { .logo { height: 64px; } }
+  .title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; margin: 0; text-align: center; }
+  @media (min-width: 640px) { .title { font-size: 36px; text-align: right; } }
+  .title .accent { color: var(--brand-red); }
+  .subtitle { margin: 4px 0 0; font-size: 13px; color: var(--muted-fg); text-align: center; }
+  @media (min-width: 640px) { .subtitle { text-align: right; } }
+
+  .toolbar { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 12px; }
+  .link-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: none; color: var(--muted-fg);
+    font-size: 12px; font-weight: 600; padding: 4px 6px;
+  }
+  .link-btn:hover { color: var(--fg); }
+
+  /* Desktop table */
+  .table-wrap {
+    border: 2px solid var(--brand-red); border-radius: 12px; overflow: hidden;
+    display: none;
+  }
+  @media (min-width: 768px) { .table-wrap { display: block; } }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px 16px; }
+  .tier-head {
+    text-align: center; font-size: 18px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.04em; padding: 16px;
+  }
+  .tier-head .icon-label { display: inline-flex; align-items: center; gap: 8px; }
+  .row-num {
+    background: var(--brand-red); color: var(--brand-red-fg);
+    font-weight: 700; text-align: center; width: 48px; padding: 12px 8px;
+  }
+  .row-label {
+    font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em;
+    background: var(--brand-dark); color: var(--brand-dark-fg);
+  }
+  .cell { text-align: center; border-left: 1px solid rgba(196,30,42,0.3); }
+  tr { border-top: 1px solid rgba(196,30,42,0.3); }
+  .price-row { border-top: 2px solid var(--brand-red); }
+  .tier-good { background: var(--brand-gray); color: var(--brand-gray-fg); }
+  .tier-better { background: var(--brand-dark); color: var(--brand-dark-fg); }
+  .tier-best { background: var(--brand-red); color: var(--brand-red-fg); }
+  .tagline-cell { padding: 14px; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .tagline-cell .icon-label { display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+  .tagline-cell .tagline-text { text-align: left; line-height: 1.2; }
+
+  /* Checkbox */
+  .check {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 24px; width: 24px; border-radius: 4px; border: 2px solid rgba(196,30,42,0.7);
+    background: var(--bg); transition: background 0.15s, border-color 0.15s; color: var(--brand-red-fg);
+    padding: 0;
+  }
+  .check:hover { border-color: var(--brand-red); }
+  .check.checked { background: var(--brand-red); border-color: var(--brand-red); }
+  .check svg { width: 16px; height: 16px; display: none; }
+  .check.checked svg { display: block; }
+
+  /* Tier-label text + info button */
+  .tier-text { font-size: 14px; font-weight: 700; }
+  .info-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: none; border: none; padding: 0;
+    color: var(--brand-red); font-weight: 700; font-size: 14px;
+  }
+  .info-btn:hover { text-decoration: underline; }
+  .info-btn-mobile {
+    background: rgba(196,30,42,0.1); padding: 4px 8px; border-radius: 4px; font-size: 12px;
+  }
+  .info-btn-mobile:hover { background: rgba(196,30,42,0.2); text-decoration: none; }
+  .pill {
+    background: rgba(196,30,42,0.1); color: var(--brand-red);
+    font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 4px;
+  }
+
+  /* Price input */
+  .price-input { position: relative; }
+  .price-input span {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    font-weight: 700; color: var(--muted-fg); font-size: 14px;
+  }
+  .price-input input {
+    width: 100%; padding: 8px 12px 8px 28px;
+    border: 2px solid rgba(196,30,42,0.4); border-radius: 6px;
+    background: var(--bg); font-weight: 700; font-size: 14px;
+  }
+  .price-input input:focus { outline: none; border-color: var(--brand-red); }
+
+  /* Buttons */
+  .btn-red {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--brand-red); color: var(--brand-red-fg);
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    font-size: 12px; padding: 8px 12px; border: none; border-radius: 6px;
+    transition: opacity 0.15s; width: 100%;
+  }
+  .btn-red:hover { opacity: 0.9; }
+  .btn-red:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Mobile cards */
+  .mobile-list { display: flex; flex-direction: column; gap: 16px; }
+  @media (min-width: 768px) { .mobile-list { display: none; } }
+  .tier-card { border: 2px solid var(--brand-red); border-radius: 12px; overflow: hidden; }
+  .tier-card-head {
+    padding: 12px 16px; display: flex; align-items: center; gap: 8px;
+    font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .tier-card ul { list-style: none; margin: 0; padding: 0; background: var(--card); }
+  .tier-card li {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-top: 1px solid var(--border); font-size: 14px;
+  }
+  .tier-card li:first-child { border-top: none; }
+  .num-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 24px; width: 24px; flex-shrink: 0; border-radius: 4px;
+    background: var(--brand-red); color: var(--brand-red-fg);
+    font-size: 12px; font-weight: 700;
+  }
+  .li-label { flex: 1; font-weight: 600; }
+  .tier-card-footer {
+    padding: 12px 16px; background: var(--card); border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .field-label {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--muted-fg); margin-bottom: 4px; display: block;
+  }
+  .tier-card-tagline { padding: 12px 16px; text-align: center; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .modal {
+    background: var(--bg); border: 2px solid var(--brand-red); border-radius: 12px;
+    width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-height: 90vh; overflow: auto;
+  }
+  .modal-head {
+    padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+    background: var(--brand-dark); color: var(--brand-dark-fg);
+    font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em;
+  }
+  .modal-head.tier-head-bg-best { background: var(--brand-red); color: var(--brand-red-fg); }
+  .modal-head.tier-head-bg-better { background: var(--brand-dark); color: var(--brand-dark-fg); }
+  .modal-head.tier-head-bg-good { background: var(--brand-gray); color: var(--brand-gray-fg); }
+  .modal-head .sub { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; opacity: 0.8; }
+  .modal-head .title-stack { display: flex; flex-direction: column; }
+  .close-x { background: none; border: none; color: inherit; padding: 4px; }
+  .close-x:hover { opacity: 0.7; }
+  .modal-body { padding: 20px; }
+  .modal-body p { font-size: 14px; line-height: 1.6; margin: 0; }
+
+  /* Payment calc */
+  .pay-summary {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: var(--muted); border-radius: 8px; margin-bottom: 16px;
+  }
+  .pay-summary .lbl { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted-fg); }
+  .pay-summary .val { font-size: 18px; font-weight: 800; }
+  .field { margin-bottom: 16px; }
+  .stepper { display: flex; align-items: center; gap: 8px; }
+  .step-btn {
+    flex-shrink: 0; height: 44px; width: 44px;
+    border: 2px solid rgba(196,30,42,0.4); background: var(--bg);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  }
+  .step-btn:hover { border-color: var(--brand-red); }
+  .stepper .input-wrap { position: relative; flex: 1; }
+  .stepper .input-wrap input {
+    width: 100%; height: 44px; padding: 0 12px;
+    border: 2px solid rgba(196,30,42,0.4); border-radius: 8px;
+    text-align: center; font-size: 16px; font-weight: 700; background: var(--bg);
+  }
+  .stepper .input-wrap input:focus { outline: none; border-color: var(--brand-red); }
+  .stepper .input-wrap.has-prefix input { padding-left: 28px; }
+  .stepper .input-wrap.has-suffix input { padding-right: 28px; }
+  .stepper .input-wrap .prefix { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--muted-fg); }
+  .stepper .input-wrap .suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--muted-fg); }
+  .quick-options { display: flex; gap: 8px; margin-top: 8px; }
+  .quick-opt {
+    flex: 1; padding: 6px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; border: 2px solid rgba(196,30,42,0.3); background: var(--bg);
+    color: var(--muted-fg);
+  }
+  .quick-opt:hover { border-color: var(--brand-red); color: var(--fg); }
+  .quick-opt.active { background: var(--brand-red); border-color: var(--brand-red); color: var(--brand-red-fg); }
+  .term-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .term-btn {
+    padding: 12px 8px; border-radius: 8px; font-size: 14px; font-weight: 700;
+    text-transform: uppercase; border: 2px solid rgba(196,30,42,0.4); background: var(--bg);
+  }
+  .term-btn:hover { border-color: var(--brand-red); }
+  .term-btn.active { background: var(--brand-red); border-color: var(--brand-red); color: var(--brand-red-fg); }
+  input[type="range"] { width: 100%; accent-color: var(--brand-red); margin-top: 8px; }
+  .result-box {
+    background: var(--brand-dark); color: var(--brand-dark-fg);
+    padding: 16px; border-radius: 8px;
+  }
+  .result-box .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .result-box .row:last-child { margin-bottom: 0; }
+  .result-box .row.main .lbl { font-size: 12px; font-weight: 700; text-transform: uppercase; opacity: 0.8; }
+  .result-box .row.main .val { font-size: 26px; font-weight: 800; color: var(--brand-red); }
+  .result-box .row.sub { font-size: 12px; opacity: 0.8; }
+  .result-box .row.sub .val { font-weight: 600; }
+  .disclaimer { font-size: 10px; color: var(--muted-fg); margin-top: 12px; line-height: 1.4; }
+
+  /* Admin */
+  .admin-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: none; color: var(--muted-fg);
+    font-size: 12px; font-weight: 600; padding: 0; margin-bottom: 8px;
+  }
+  .admin-back:hover { color: var(--fg); }
+  .admin-card {
+    border: 2px solid var(--brand-red); border-radius: 12px; overflow: hidden;
+    max-width: 720px; margin: 0 auto;
+  }
+  .admin-head {
+    background: var(--brand-dark); color: var(--brand-dark-fg);
+    padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+    font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .admin-list { list-style: none; margin: 0; padding: 0; background: var(--card); }
+  .admin-item { padding: 12px; border-top: 1px solid var(--border); }
+  .admin-item:first-child { border-top: none; }
+  .admin-item.dragging { opacity: 0.5; }
+  .admin-item-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .drag-handle { cursor: grab; color: var(--muted-fg); display: inline-flex; padding: 4px; touch-action: none; }
+  .drag-handle:hover { color: var(--fg); }
+  .trash-btn { margin-left: auto; background: none; border: none; padding: 6px; color: var(--muted-fg); }
+  .trash-btn:hover { color: var(--brand-red); }
+  .text-input {
+    width: 100%; padding: 8px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg);
+    font-size: 14px; font-weight: 600;
+  }
+  .text-input:focus { outline: none; border-color: var(--brand-red); }
+  .tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .tier-grid label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--muted-fg); margin-bottom: 2px; display: block;
+  }
+  .tier-grid input, .tier-grid textarea {
+    width: 100%; padding: 6px 8px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg);
+    font-size: 12px; font-weight: 600;
+  }
+  .tier-grid textarea { resize: none; height: 56px; }
+  .tier-grid input:focus, .tier-grid textarea:focus { outline: none; border-color: var(--brand-red); }
+  .check-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .check-grid label {
+    display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+    border: 1px solid var(--border); border-radius: 6px; cursor: pointer;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+  }
+  .check-grid label:hover { border-color: var(--brand-red); }
+  .check-grid input { accent-color: var(--brand-red); height: 16px; width: 16px; }
+  .admin-footer { background: var(--card); padding: 12px; border-top: 1px solid var(--border); }
+  .saved-indicator { font-size: 11px; font-weight: 700; color: var(--brand-red); opacity: 0; transition: opacity 0.2s; }
+  .saved-indicator.show { opacity: 1; }
+  .admin-help { font-size: 12px; color: var(--muted-fg); margin-top: 16px; text-align: center; }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+<script>
+/* ===================== STATE ===================== */
+const FEATURES_KEY = "klaus-roofing-features-v4";
+const CHECKS_KEY = "klaus-roofing-comparison-v2";
+const PRICES_KEY = "klaus-roofing-prices-v1";
+
+const DEFAULT_FEATURES = [
+  {
+    label: "Shingles",
+    tiers: { best: "Class 4", better: "Class 3", good: "Class 2" },
+    info: {
+      best: "The highest impact resistance rating available. Class 4 shingles withstand hail up to 2 inches in diameter and simulated impacts from 20 feet. Many insurers offer premium discounts. Maximum protection for severe weather.",
+      better: "Strong impact resistance that handles moderate hail and debris. Class 3 shingles pass rigorous testing with impacts from 17 feet. Excellent protection for most climates — a smart balance of performance and value.",
+      good: "Standard impact resistance that meets code requirements. Class 2 shingles handle smaller hail and typical weather reliably. A solid, budget-friendly choice for homeowners who need dependable basic protection.",
+    },
+  },
+  { label: "Replace Rotted or Damaged Roof Decking", defaults: { best: true, better: true, good: true } },
+  { label: "Back-Nail Entire Roof Deck", defaults: { best: true, better: false, good: false } },
+  { label: "Sealoron XT Ice & Water Barrier", defaults: { best: true, better: false, good: false } },
+  { label: "Generic Ice & Water Barrier", defaults: { best: false, better: true, good: true } },
+  { label: "Sealoron XT Roof Deck Tape", defaults: { best: true, better: false, good: false } },
+  { label: "Velora One Synthetic Underlayment", defaults: { best: true, better: true, good: false } },
+  { label: "Generic Synthetic Underlayment", defaults: { best: false, better: false, good: true } },
+  {
+    label: "Warranty",
+    tiers: { best: "50 Year", better: "5 Year", good: "1 Year" },
+    info: {
+      best: "Our top-tier 50-year warranty offers decades of peace of mind. It covers materials and workmanship for the long haul — protecting your investment against defects, leaks, and premature wear for virtually the lifetime of your home.",
+      better: "A solid 5-year warranty covering both materials and workmanship. Great middle-ground protection that guards against early failures and installation issues while keeping your project affordable.",
+      good: "A 1-year warranty covering installation defects and immediate issues. Reliable basic coverage that ensures your new roof was installed correctly and performs as expected from day one.",
+    },
+  },
+];
+
+const TIERS = [
+  { key: "good", label: "Good", colorClass: "tier-good", tagline: "Basic Protection. Budget Friendly." },
+  { key: "better", label: "Better", colorClass: "tier-better", tagline: "Strong Performance. Solid Value." },
+  { key: "best", label: "Best", colorClass: "tier-best", tagline: "Maximum Protection. Maximum Peace of Mind." },
+];
+
+function isTierFeature(f) { return f && typeof f === "object" && f.tiers; }
+function isCheckFeature(f) { return f && typeof f === "object" && f.defaults; }
+function featureLabel(f) { return typeof f === "string" ? f : f.label; }
+
+function loadFeatures() {
+  try {
+    const raw = localStorage.getItem(FEATURES_KEY);
+    if (!raw) return JSON.parse(JSON.stringify(DEFAULT_FEATURES));
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return JSON.parse(JSON.stringify(DEFAULT_FEATURES));
+    return arr.map(item => {
+      if (!isTierFeature(item) || item.info) return item;
+      const def = DEFAULT_FEATURES.find(d => isTierFeature(d) && d.label === item.label);
+      if (def && def.info) return Object.assign({}, item, { info: def.info });
+      return item;
+    });
+  } catch { return JSON.parse(JSON.stringify(DEFAULT_FEATURES)); }
+}
+function saveFeatures(f) { try { localStorage.setItem(FEATURES_KEY, JSON.stringify(f)); } catch {} }
+function loadChecks() { try { return JSON.parse(localStorage.getItem(CHECKS_KEY)) || {}; } catch { return {}; } }
+function saveChecks(c) { try { localStorage.setItem(CHECKS_KEY, JSON.stringify(c)); } catch {} }
+function loadPrices() { try { return JSON.parse(localStorage.getItem(PRICES_KEY)) || { best: "", better: "", good: "" }; } catch { return { best: "", better: "", good: "" }; } }
+function savePrices(p) { try { localStorage.setItem(PRICES_KEY, JSON.stringify(p)); } catch {} }
+
+let state = {
+  features: loadFeatures(),
+  checks: loadChecks(),
+  prices: loadPrices(),
+};
+
+function getDefault(feat, tier) {
+  if (typeof feat === "string") return false;
+  if (isTierFeature(feat)) return false;
+  return !!feat.defaults[tier];
+}
+function isChecked(row, tier) {
+  const k = row + ":" + tier;
+  if (k in state.checks) return !!state.checks[k];
+  return getDefault(state.features[row], tier);
+}
+function toggleCheck(row, tier) {
+  const k = row + ":" + tier;
+  state.checks[k] = !isChecked(row, tier);
+  saveChecks(state.checks);
+  renderComparison();
+}
+
+/* ===================== ICONS ===================== */
+function icon(name, size) {
+  size = size || 16;
+  const wrap = (path) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" stroke="none">${path}</svg>`;
+  const wrapStroke = (path) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+  switch (name) {
+    case "star": return wrap('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>');
+    case "award": return wrap('<circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 22 12 19 17 22 15.79 13.88" fill="currentColor" stroke="white" stroke-width="0.5"/>');
+    case "check-circle": return wrap('<circle cx="12" cy="12" r="10"/><polyline points="16 10 11 15 8 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>');
+    case "info": return wrapStroke('<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>');
+    case "x": return wrapStroke('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>');
+    case "rotate": return wrapStroke('<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>');
+    case "calc": return wrapStroke('<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8.01" y2="10"/><line x1="12" y1="10" x2="12.01" y2="10"/><line x1="16" y1="10" x2="16.01" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/><line x1="8" y1="18" x2="8.01" y2="18"/><line x1="12" y1="18" x2="12.01" y2="18"/><line x1="16" y1="18" x2="16.01" y2="18"/>');
+    case "minus": return wrapStroke('<line x1="5" y1="12" x2="19" y2="12"/>');
+    case "plus": return wrapStroke('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>');
+    case "trash": return wrapStroke('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>');
+    case "grip": return wrapStroke('<circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/>');
+    case "arrow-left": return wrapStroke('<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>');
+    case "check": return wrapStroke('<polyline points="20 6 9 17 4 12"/>');
+  }
+  return "";
+}
+function tierIcon(key, size) {
+  if (key === "best") return icon("star", size);
+  if (key === "better") return icon("award", size);
+  return icon("check-circle", size);
+}
+
+/* ===================== ESCAPING ===================== */
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+
+/* ===================== ROOT / ROUTING ===================== */
+function render() {
+  const route = window.location.hash.replace(/^#\/?/, "");
+  if (route === "admin") renderAdmin();
+  else renderComparison();
+}
+
+/* ===================== COMPARISON VIEW ===================== */
+function renderComparison() {
+  const root = document.getElementById("root");
+  const F = state.features;
+
+  const tableRows = F.map((feat, i) => {
+    const cells = TIERS.map(t => {
+      if (isTierFeature(feat)) {
+        const txt = feat.tiers[t.key];
+        if (feat.info && feat.info[t.key]) {
+          return `<td class="cell"><button class="info-btn" data-info-row="${i}" data-info-tier="${t.key}">${esc(txt)} ${icon("info", 14)}</button></td>`;
+        }
+        return `<td class="cell"><span class="tier-text">${esc(txt)}</span></td>`;
+      }
+      const c = isChecked(i, t.key);
+      return `<td class="cell"><button class="check ${c ? "checked" : ""}" data-toggle-row="${i}" data-toggle-tier="${t.key}" aria-pressed="${c}">${icon("check", 16)}</button></td>`;
+    }).join("");
+    return `<tr>
+      <td class="row-num">${i + 1}</td>
+      <td class="row-label">${esc(featureLabel(feat))}</td>
+      ${cells}
+    </tr>`;
+  }).join("");
+
+  const priceCells = TIERS.map(t => `
+    <td class="cell" style="background:var(--bg);padding:12px;">
+      <div class="price-input"><span>$</span>
+        <input type="text" inputmode="decimal" data-price="${t.key}" value="${esc(state.prices[t.key])}" placeholder="0.00" />
+      </div>
+    </td>`).join("");
+
+  const payCells = TIERS.map(t => `
+    <td class="cell" style="background:var(--bg);padding:12px;">
+      <button class="btn-red" data-pay="${t.key}" ${state.prices[t.key] ? "" : "disabled"}>${icon("calc", 14)} Payment Options</button>
+    </td>`).join("");
+
+  const tierHeads = TIERS.map(t => `
+    <th class="tier-head ${t.colorClass}">
+      <span class="icon-label">${tierIcon(t.key, 22)} ${t.label}</span>
+    </th>`).join("");
+
+  const taglineCells = TIERS.map(t => `
+    <td class="tagline-cell ${t.colorClass}">
+      <span class="icon-label">${tierIcon(t.key, 18)} <span class="tagline-text">${esc(t.tagline)}</span></span>
+    </td>`).join("");
+
+  // Mobile cards
+  const mobileCards = TIERS.map(t => {
+    const items = F.map((feat, i) => {
+      let right;
+      if (isTierFeature(feat)) {
+        const txt = feat.tiers[t.key];
+        right = feat.info && feat.info[t.key]
+          ? `<button class="info-btn info-btn-mobile" data-info-row="${i}" data-info-tier="${t.key}">${esc(txt)} ${icon("info", 12)}</button>`
+          : `<span class="pill">${esc(txt)}</span>`;
+      } else {
+        const c = isChecked(i, t.key);
+        right = `<button class="check ${c ? "checked" : ""}" data-toggle-row="${i}" data-toggle-tier="${t.key}" aria-pressed="${c}">${icon("check", 14)}</button>`;
+      }
+      return `<li>
+        <span class="num-badge">${i + 1}</span>
+        <span class="li-label">${esc(featureLabel(feat))}</span>
+        ${right}
+      </li>`;
+    }).join("");
+    return `<div class="tier-card">
+      <div class="tier-card-head ${t.colorClass}">${tierIcon(t.key, 18)} ${t.label}</div>
+      <ul>${items}</ul>
+      <div class="tier-card-footer">
+        <div>
+          <label class="field-label">Total Price</label>
+          <div class="price-input"><span>$</span>
+            <input type="text" inputmode="decimal" data-price="${t.key}" value="${esc(state.prices[t.key])}" placeholder="0.00" />
+          </div>
+        </div>
+        <button class="btn-red" data-pay="${t.key}" ${state.prices[t.key] ? "" : "disabled"}>${icon("calc", 14)} Payment Options</button>
+      </div>
+      <div class="tier-card-tagline ${t.colorClass}">${esc(t.tagline)}</div>
+    </div>`;
+  }).join("");
+
+  root.innerHTML = `
+    <div class="container">
+      <header class="header">
+        <img class="logo" src="https://cdn.treehouseinternetgroup.com/cms_images/2721/klaus-logo-no-tag2.svg" alt="Klaus Roofing Systems" />
+        <div>
+          <h1 class="title">ROOFING SYSTEM <span class="accent">COMPARISON</span></h1>
+          <p class="subtitle">Compare features. Choose the protection that's right for you.</p>
+        </div>
+      </header>
+
+      <div class="toolbar">
+        <button class="link-btn" id="btn-admin">Admin</button>
+        <button class="link-btn" id="btn-reset">${icon("rotate", 14)} Reset</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:64px;background:var(--bg);"></th>
+              <th style="background:var(--bg);"></th>
+              ${tierHeads}
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+            <tr class="price-row">
+              <td class="row-num">$</td>
+              <td class="row-label">Total Price</td>
+              ${priceCells}
+            </tr>
+            <tr>
+              <td colspan="2" style="background:var(--bg);"></td>
+              ${payCells}
+            </tr>
+            <tr>
+              <td colspan="2" style="background:var(--bg);"></td>
+              ${taglineCells}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mobile-list">${mobileCards}</div>
+    </div>
+  `;
+
+  // Wire up
+  root.querySelectorAll("[data-toggle-row]").forEach(el => {
+    el.addEventListener("click", () => toggleCheck(+el.dataset.toggleRow, el.dataset.toggleTier));
+  });
+  root.querySelectorAll("[data-info-row]").forEach(el => {
+    el.addEventListener("click", () => {
+      const feat = state.features[+el.dataset.infoRow];
+      const tier = el.dataset.infoTier;
+      openInfoModal(feat.label, feat.tiers[tier], feat.info[tier]);
+    });
+  });
+  root.querySelectorAll("[data-price]").forEach(el => {
+    el.addEventListener("input", (e) => {
+      const t = el.dataset.price;
+      state.prices[t] = e.target.value.replace(/[^\d.]/g, "");
+      savePrices(state.prices);
+      // Update disabled state for matching payment buttons
+      root.querySelectorAll(`[data-pay="${t}"]`).forEach(b => {
+        if (state.prices[t]) b.removeAttribute("disabled"); else b.setAttribute("disabled", "");
+      });
+    });
+  });
+  root.querySelectorAll("[data-pay]").forEach(el => {
+    el.addEventListener("click", () => openPaymentCalc(el.dataset.pay));
+  });
+  document.getElementById("btn-admin").addEventListener("click", () => { window.location.hash = "#admin"; });
+  document.getElementById("btn-reset").addEventListener("click", () => {
+    state.checks = {}; state.prices = { best: "", better: "", good: "" };
+    saveChecks(state.checks); savePrices(state.prices);
+    renderComparison();
+  });
+}
+
+/* ===================== MODALS ===================== */
+let modalEl = null;
+function closeModal() { if (modalEl) { modalEl.remove(); modalEl = null; } }
+function openModal(html) {
+  closeModal();
+  modalEl = document.createElement("div");
+  modalEl.className = "modal-bg";
+  modalEl.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
+  modalEl.addEventListener("click", (e) => { if (e.target === modalEl) closeModal(); });
+  document.body.appendChild(modalEl);
+  modalEl.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeModal));
+  return modalEl;
+}
+
+function openInfoModal(label, tierLabel, text) {
+  openModal(`
+    <div class="modal-head">
+      <div class="title-stack"><span>${esc(label)}: ${esc(tierLabel)}</span></div>
+      <button class="close-x" data-close aria-label="Close">${icon("x", 18)}</button>
+    </div>
+    <div class="modal-body"><p>${esc(text)}</p></div>
+  `);
+}
+
+/* ===================== PAYMENT CALC ===================== */
+function openPaymentCalc(tierKey) {
+  const tier = TIERS.find(t => t.key === tierKey);
+  const price = parseFloat(state.prices[tierKey]) || 0;
+  let downPayment = 0, apr = 8.99, termMonths = 60, aprInput = "8.99";
+
+  const fmt = n => (n || 0).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+
+  function compute() {
+    const financed = Math.max(0, price - downPayment);
+    const r = apr / 100 / 12;
+    let monthly = 0;
+    if (financed > 0 && termMonths > 0) {
+      monthly = r === 0 ? financed / termMonths : (financed * r) / (1 - Math.pow(1 + r, -termMonths));
+    }
+    const totalPaid = monthly * termMonths + downPayment;
+    const totalInterest = Math.max(0, totalPaid - price);
+    return { financed, monthly, totalPaid, totalInterest };
+  }
+
+  function html() {
+    const c = compute();
+    const headBg = "tier-head-bg-" + tier.key;
+    const quickOpts = [
+      { label: "0%", val: 0 },
+      { label: "10%", val: Math.round(price * 0.1) },
+      { label: "20%", val: Math.round(price * 0.2) },
+      { label: "50%", val: Math.round(price * 0.5) },
+    ];
+    return `
+      <div class="modal-head ${headBg}">
+        <div class="title-stack">
+          <span class="sub">${esc(tier.label)} PLAN</span>
+          <span>Payment Options</span>
+        </div>
+        <button class="close-x" data-close aria-label="Close">${icon("x", 18)}</button>
+      </div>
+      <div class="modal-body">
+        <div class="pay-summary">
+          <span class="lbl">Total Price</span>
+          <span class="val">${fmt(price)}</span>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Down Payment</label>
+          <div class="stepper">
+            <button class="step-btn" data-down-delta="-500" aria-label="Decrease">${icon("minus", 14)}</button>
+            <div class="input-wrap has-prefix"><span class="prefix">$</span>
+              <input type="text" inputmode="decimal" id="down-input" value="${downPayment ? downPayment.toLocaleString("en-US") : ""}" />
+            </div>
+            <button class="step-btn" data-down-delta="500" aria-label="Increase">${icon("plus", 14)}</button>
+          </div>
+          <div class="quick-options">
+            ${quickOpts.map(o => `<button class="quick-opt ${downPayment === o.val ? "active" : ""}" data-down-set="${o.val}">${o.label}</button>`).join("")}
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Interest Rate (APR): ${apr.toFixed(2)}%</label>
+          <div class="stepper">
+            <button class="step-btn" data-apr-delta="-0.25" aria-label="Decrease">${icon("minus", 14)}</button>
+            <div class="input-wrap has-suffix">
+              <input type="text" inputmode="decimal" id="apr-input" value="${esc(aprInput)}" />
+              <span class="suffix">%</span>
+            </div>
+            <button class="step-btn" data-apr-delta="0.25" aria-label="Increase">${icon("plus", 14)}</button>
+          </div>
+          <input type="range" id="apr-range" min="0" max="29.99" step="0.25" value="${apr}" />
+        </div>
+
+        <div class="field">
+          <label class="field-label">Term</label>
+          <div class="term-grid">
+            ${[24,36,60,120].map(m => `<button class="term-btn ${termMonths === m ? "active" : ""}" data-term="${m}">${m/12}yr</button>`).join("")}
+          </div>
+        </div>
+
+        <div class="result-box">
+          <div class="row main"><span class="lbl">Estimated Monthly</span><span class="val">${fmt(c.monthly)}</span></div>
+          <div class="row sub"><span>Amount Financed</span><span class="val">${fmt(c.financed)}</span></div>
+          <div class="row sub"><span>Total Interest</span><span class="val">${fmt(c.totalInterest)}</span></div>
+          <div class="row sub"><span>Total of Payments</span><span class="val">${fmt(c.totalPaid)}</span></div>
+        </div>
+
+        <p class="disclaimer">Estimates only. Actual rates and terms depend on credit approval and lender.</p>
+      </div>
+    `;
+  }
+
+  function rerender() {
+    const inner = modalEl.querySelector(".modal");
+    inner.innerHTML = html();
+    wire();
+  }
+
+  function wire() {
+    modalEl.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeModal));
+    modalEl.querySelectorAll("[data-down-delta]").forEach(b => b.addEventListener("click", () => {
+      const d = parseFloat(b.dataset.downDelta);
+      downPayment = Math.max(0, Math.min(price, Math.round((downPayment + d) / 100) * 100));
+      rerender();
+    }));
+    modalEl.querySelectorAll("[data-down-set]").forEach(b => b.addEventListener("click", () => {
+      downPayment = parseFloat(b.dataset.downSet);
+      rerender();
+    }));
+    modalEl.querySelectorAll("[data-apr-delta]").forEach(b => b.addEventListener("click", () => {
+      const d = parseFloat(b.dataset.aprDelta);
+      apr = Math.max(0, Math.min(29.99, Math.round((apr + d) * 100) / 100));
+      aprInput = apr.toFixed(2);
+      rerender();
+    }));
+    modalEl.querySelectorAll("[data-term]").forEach(b => b.addEventListener("click", () => {
+      termMonths = parseInt(b.dataset.term, 10);
+      rerender();
+    }));
+    const downIn = modalEl.querySelector("#down-input");
+    if (downIn) downIn.addEventListener("input", (e) => {
+      const raw = e.target.value.replace(/[^\d.]/g, "");
+      const n = parseFloat(raw) || 0;
+      downPayment = Math.max(0, Math.min(price, n));
+      // Update only the dependent UI without losing focus
+      modalEl.querySelectorAll("[data-down-set]").forEach(b => {
+        b.classList.toggle("active", parseFloat(b.dataset.downSet) === downPayment);
+      });
+      updateResults();
+    });
+    const aprIn = modalEl.querySelector("#apr-input");
+    if (aprIn) {
+      aprIn.addEventListener("input", (e) => {
+        aprInput = e.target.value;
+        const n = parseFloat(aprInput);
+        if (!isNaN(n)) {
+          apr = Math.max(0, Math.min(29.99, Math.round(n * 100) / 100));
+          const lbl = modalEl.querySelector(".field-label");
+          // Update APR label
+          const labels = modalEl.querySelectorAll(".field-label");
+          labels.forEach(l => { if (l.textContent.startsWith("Interest")) l.textContent = `Interest Rate (APR): ${apr.toFixed(2)}%`; });
+          const range = modalEl.querySelector("#apr-range");
+          if (range) range.value = apr;
+          updateResults();
+        }
+      });
+      aprIn.addEventListener("blur", () => { aprInput = apr.toFixed(2); aprIn.value = aprInput; });
+    }
+    const range = modalEl.querySelector("#apr-range");
+    if (range) range.addEventListener("input", (e) => {
+      apr = parseFloat(e.target.value);
+      aprInput = apr.toFixed(2);
+      const aprInEl = modalEl.querySelector("#apr-input");
+      if (aprInEl) aprInEl.value = aprInput;
+      const labels = modalEl.querySelectorAll(".field-label");
+      labels.forEach(l => { if (l.textContent.startsWith("Interest")) l.textContent = `Interest Rate (APR): ${apr.toFixed(2)}%`; });
+      updateResults();
+    });
+  }
+
+  function updateResults() {
+    const c = compute();
+    const box = modalEl.querySelector(".result-box");
+    if (!box) return;
+    const rows = box.querySelectorAll(".row .val");
+    rows[0].textContent = fmt(c.monthly);
+    rows[1].textContent = fmt(c.financed);
+    rows[2].textContent = fmt(c.totalInterest);
+    rows[3].textContent = fmt(c.totalPaid);
+  }
+
+  openModal(html());
+  wire();
+}
+
+/* ===================== ADMIN VIEW ===================== */
+let dragIdx = null;
+let savedTimer = null;
+
+function flashSaved() {
+  const el = document.getElementById("saved-indicator");
+  if (!el) return;
+  el.classList.add("show");
+  clearTimeout(savedTimer);
+  savedTimer = setTimeout(() => el.classList.remove("show"), 1200);
+}
+
+function persistFeatures() { saveFeatures(state.features); flashSaved(); }
+
+function renderAdmin() {
+  const root = document.getElementById("root");
+  const items = state.features.map((feat, i) => {
+    let body;
+    if (typeof feat === "string") {
+      body = `
+        <input class="text-input" data-edit-label="${i}" value="${esc(feat)}" />
+        ${checkDefaultsHtml(i, { best: false, better: false, good: false })}
+      `;
+    } else if (isTierFeature(feat)) {
+      body = `
+        <input class="text-input" data-edit-label="${i}" value="${esc(feat.label)}" placeholder="Feature label" />
+        <div class="tier-grid">
+          ${TIERS.map(t => `<div>
+            <label>${t.key}</label>
+            <input data-edit-tier="${i}" data-tier-key="${t.key}" value="${esc(feat.tiers[t.key])}" />
+          </div>`).join("")}
+        </div>
+        <div class="tier-grid">
+          ${TIERS.map(t => `<div>
+            <label>${t.key} info</label>
+            <textarea data-edit-info="${i}" data-tier-key="${t.key}" placeholder="Popup description...">${esc((feat.info || {})[t.key] || "")}</textarea>
+          </div>`).join("")}
+        </div>
+      `;
+    } else {
+      body = `
+        <input class="text-input" data-edit-label="${i}" value="${esc(feat.label)}" placeholder="Feature label" />
+        ${checkDefaultsHtml(i, feat.defaults)}
+      `;
+    }
+    return `<li class="admin-item" draggable="true" data-idx="${i}">
+      <div class="admin-item-head">
+        <span class="drag-handle">${icon("grip", 16)}</span>
+        <span class="num-badge">${i + 1}</span>
+        <button class="trash-btn" data-remove="${i}" aria-label="Remove">${icon("trash", 16)}</button>
+      </div>
+      ${body}
+    </li>`;
+  }).join("");
+
+  root.innerHTML = `
+    <div class="container" style="max-width:720px;">
+      <button class="admin-back" id="back-btn">${icon("arrow-left", 14)} Back to comparison</button>
+      <h1 class="title" style="text-align:left;">MANAGE <span class="accent">FEATURES</span></h1>
+      <p class="subtitle" style="text-align:left;">Edit, reorder, add, or remove items shown in the comparison chart.</p>
+
+      <div style="height:16px;"></div>
+
+      <div class="admin-card">
+        <div class="admin-head">
+          <span>Feature List (${state.features.length})</span>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="saved-indicator" id="saved-indicator">Saved</span>
+            <button class="link-btn" style="color:inherit;opacity:0.8;" id="reset-btn">${icon("rotate", 14)} Reset</button>
+          </div>
+        </div>
+        <ul class="admin-list" id="admin-list">${items || `<li class="admin-item" style="text-align:center;color:var(--muted-fg);">No features yet. Add one below.</li>`}</ul>
+        <div class="admin-footer">
+          <button class="btn-red" id="add-btn">${icon("plus", 14)} Add Feature</button>
+        </div>
+      </div>
+
+      <p class="admin-help">Changes save automatically and appear in the comparison chart immediately.</p>
+    </div>
+  `;
+
+  document.getElementById("back-btn").addEventListener("click", () => { window.location.hash = ""; });
+  document.getElementById("add-btn").addEventListener("click", () => {
+    state.features.push("New feature");
+    persistFeatures(); renderAdmin();
+  });
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    if (confirm("Reset features to the default list?")) {
+      state.features = JSON.parse(JSON.stringify(DEFAULT_FEATURES));
+      persistFeatures(); renderAdmin();
+    }
+  });
+
+  root.querySelectorAll("[data-remove]").forEach(b => b.addEventListener("click", () => {
+    state.features.splice(+b.dataset.remove, 1);
+    persistFeatures(); renderAdmin();
+  }));
+
+  root.querySelectorAll("[data-edit-label]").forEach(inp => inp.addEventListener("input", (e) => {
+    const i = +inp.dataset.editLabel;
+    const f = state.features[i];
+    if (typeof f === "string") state.features[i] = e.target.value;
+    else f.label = e.target.value;
+    persistFeatures();
+  }));
+  root.querySelectorAll("[data-edit-tier]").forEach(inp => inp.addEventListener("input", (e) => {
+    const i = +inp.dataset.editTier;
+    state.features[i].tiers[inp.dataset.tierKey] = e.target.value;
+    persistFeatures();
+  }));
+  root.querySelectorAll("[data-edit-info]").forEach(inp => inp.addEventListener("input", (e) => {
+    const i = +inp.dataset.editInfo;
+    const f = state.features[i];
+    f.info = f.info || { best: "", better: "", good: "" };
+    f.info[inp.dataset.tierKey] = e.target.value;
+    if (!Object.values(f.info).some(v => (v || "").trim() !== "")) delete f.info;
+    persistFeatures();
+  }));
+  root.querySelectorAll("[data-default-check]").forEach(inp => inp.addEventListener("change", (e) => {
+    const i = +inp.dataset.defaultCheck;
+    const tier = inp.dataset.tierKey;
+    let f = state.features[i];
+    if (typeof f === "string") {
+      f = state.features[i] = { label: f, defaults: { best: false, better: false, good: false } };
+    }
+    if (!f.defaults) f.defaults = { best: false, better: false, good: false };
+    f.defaults[tier] = e.target.checked;
+    persistFeatures();
+  }));
+
+  // Drag and drop
+  root.querySelectorAll(".admin-item[draggable]").forEach(li => {
+    li.addEventListener("dragstart", () => { dragIdx = +li.dataset.idx; li.classList.add("dragging"); });
+    li.addEventListener("dragend", () => { li.classList.remove("dragging"); persistFeatures(); renderAdmin(); });
+    li.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      const i = +li.dataset.idx;
+      if (dragIdx === null || dragIdx === i) return;
+      const [moved] = state.features.splice(dragIdx, 1);
+      state.features.splice(i, 0, moved);
+      dragIdx = i;
+      // Re-render just enough — full rerender for simplicity
+      renderAdmin();
+      const newLi = document.querySelector(`.admin-item[data-idx="${i}"]`);
+      if (newLi) newLi.classList.add("dragging");
+    });
+  });
+}
+
+function checkDefaultsHtml(i, defaults) {
+  return `<div>
+    <label class="field-label" style="margin-top:8px;">Checked by default</label>
+    <div class="check-grid">
+      ${TIERS.map(t => `<label>
+        <input type="checkbox" data-default-check="${i}" data-tier-key="${t.key}" ${defaults[t.key] ? "checked" : ""} />
+        <span>${t.key}</span>
+      </label>`).join("")}
+    </div>
+  </div>`;
+}
+
+/* ===================== BOOT ===================== */
+window.addEventListener("hashchange", render);
+window.addEventListener("storage", () => { state.features = loadFeatures(); state.checks = loadChecks(); state.prices = loadPrices(); render(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+render();
+</script>
+</body>
+</html>
