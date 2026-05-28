@@ -394,11 +394,18 @@ function toggleCheck(row, tier) {
   renderComparison();
 }
 
-/* ===================== ICONS ===================== */
+/* ===================== ICONS =====================
+   NOTE: No backtick template literals are used anywhere below — string
+   concatenation only — so CMS engines that interpret ${var} (JSP, Velocity,
+   Thymeleaf, etc.) don't mangle this script. */
 function icon(name, size) {
   size = size || 16;
-  const wrap = (path) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" stroke="none">${path}</svg>`;
-  const wrapStroke = (path) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+  function wrap(path) {
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="currentColor" stroke="none">' + path + '</svg>';
+  }
+  function wrapStroke(path) {
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg>';
+  }
   switch (name) {
     case "star": return wrap('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>');
     case "award": return wrap('<circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 22 12 19 17 22 15.79 13.88" fill="currentColor" stroke="white" stroke-width="0.5"/>');
@@ -423,170 +430,158 @@ function tierIcon(key, size) {
 }
 
 /* ===================== ESCAPING ===================== */
-function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+  });
+}
+function attr(s) { return '"' + esc(s) + '"'; }
 
 /* ===================== ROOT / ROUTING ===================== */
 function render() {
-  const route = window.location.hash.replace(/^#\/?/, "");
+  var route = window.location.hash.replace(/^#\/?/, "");
   if (route === "admin") renderAdmin();
   else renderComparison();
 }
 
 /* ===================== COMPARISON VIEW ===================== */
 function renderComparison() {
-  const root = document.getElementById("root");
-  const F = state.features;
+  var root = document.getElementById("root");
+  var F = state.features;
 
-  const tableRows = F.map((feat, i) => {
-    const cells = TIERS.map(t => {
+  var tableRows = F.map(function (feat, i) {
+    var cells = TIERS.map(function (t) {
       if (isTierFeature(feat)) {
-        const txt = feat.tiers[t.key];
+        var txt = feat.tiers[t.key];
         if (feat.info && feat.info[t.key]) {
-          return `<td class="cell"><button class="info-btn" data-info-row="${i}" data-info-tier="${t.key}">${esc(txt)} ${icon("info", 14)}</button></td>`;
+          return '<td class="cell"><button class="info-btn" data-info-row=' + attr(i) + ' data-info-tier=' + attr(t.key) + '>' + esc(txt) + ' ' + icon("info", 14) + '</button></td>';
         }
-        return `<td class="cell"><span class="tier-text">${esc(txt)}</span></td>`;
+        return '<td class="cell"><span class="tier-text">' + esc(txt) + '</span></td>';
       }
-      const c = isChecked(i, t.key);
-      return `<td class="cell"><button class="check ${c ? "checked" : ""}" data-toggle-row="${i}" data-toggle-tier="${t.key}" aria-pressed="${c}">${icon("check", 16)}</button></td>`;
+      var c = isChecked(i, t.key);
+      return '<td class="cell"><button class="check ' + (c ? "checked" : "") + '" data-toggle-row=' + attr(i) + ' data-toggle-tier=' + attr(t.key) + ' aria-pressed=' + attr(c) + '>' + icon("check", 16) + '</button></td>';
     }).join("");
-    return `<tr>
-      <td class="row-num">${i + 1}</td>
-      <td class="row-label">${esc(featureLabel(feat))}</td>
-      ${cells}
-    </tr>`;
+    return '<tr><td class="row-num">' + (i + 1) + '</td><td class="row-label">' + esc(featureLabel(feat)) + '</td>' + cells + '</tr>';
   }).join("");
 
-  const priceCells = TIERS.map(t => `
-    <td class="cell" style="background:var(--bg);padding:12px;">
-      <div class="price-input"><span>$</span>
-        <input type="text" inputmode="decimal" data-price="${t.key}" value="${esc(state.prices[t.key])}" placeholder="0.00" />
-      </div>
-    </td>`).join("");
+  var priceCells = TIERS.map(function (t) {
+    return '<td class="cell" style="background:var(--bg);padding:12px;">'
+      + '<div class="price-input"><span>$</span>'
+      + '<input type="text" inputmode="decimal" data-price=' + attr(t.key) + ' value=' + attr(state.prices[t.key]) + ' placeholder="0.00" />'
+      + '</div></td>';
+  }).join("");
 
-  const payCells = TIERS.map(t => `
-    <td class="cell" style="background:var(--bg);padding:12px;">
-      <button class="btn-red" data-pay="${t.key}" ${state.prices[t.key] ? "" : "disabled"}>${icon("calc", 14)} Payment Options</button>
-    </td>`).join("");
+  var payCells = TIERS.map(function (t) {
+    var disabled = state.prices[t.key] ? "" : "disabled";
+    return '<td class="cell" style="background:var(--bg);padding:12px;">'
+      + '<button class="btn-red" data-pay=' + attr(t.key) + ' ' + disabled + '>'
+      + icon("calc", 14) + ' Payment Options</button></td>';
+  }).join("");
 
-  const tierHeads = TIERS.map(t => `
-    <th class="tier-head ${t.colorClass}">
-      <span class="icon-label">${tierIcon(t.key, 22)} ${t.label}</span>
-    </th>`).join("");
+  var tierHeads = TIERS.map(function (t) {
+    return '<th class="tier-head ' + t.colorClass + '">'
+      + '<span class="icon-label">' + tierIcon(t.key, 22) + ' ' + t.label + '</span></th>';
+  }).join("");
 
-  const taglineCells = TIERS.map(t => `
-    <td class="tagline-cell ${t.colorClass}">
-      <span class="icon-label">${tierIcon(t.key, 18)} <span class="tagline-text">${esc(t.tagline)}</span></span>
-    </td>`).join("");
+  var taglineCells = TIERS.map(function (t) {
+    return '<td class="tagline-cell ' + t.colorClass + '">'
+      + '<span class="icon-label">' + tierIcon(t.key, 18)
+      + ' <span class="tagline-text">' + esc(t.tagline) + '</span></span></td>';
+  }).join("");
 
-  // Mobile cards
-  const mobileCards = TIERS.map(t => {
-    const items = F.map((feat, i) => {
-      let right;
+  var mobileCards = TIERS.map(function (t) {
+    var items = F.map(function (feat, i) {
+      var right;
       if (isTierFeature(feat)) {
-        const txt = feat.tiers[t.key];
-        right = feat.info && feat.info[t.key]
-          ? `<button class="info-btn info-btn-mobile" data-info-row="${i}" data-info-tier="${t.key}">${esc(txt)} ${icon("info", 12)}</button>`
-          : `<span class="pill">${esc(txt)}</span>`;
+        var txt = feat.tiers[t.key];
+        if (feat.info && feat.info[t.key]) {
+          right = '<button class="info-btn info-btn-mobile" data-info-row=' + attr(i) + ' data-info-tier=' + attr(t.key) + '>' + esc(txt) + ' ' + icon("info", 12) + '</button>';
+        } else {
+          right = '<span class="pill">' + esc(txt) + '</span>';
+        }
       } else {
-        const c = isChecked(i, t.key);
-        right = `<button class="check ${c ? "checked" : ""}" data-toggle-row="${i}" data-toggle-tier="${t.key}" aria-pressed="${c}">${icon("check", 14)}</button>`;
+        var c = isChecked(i, t.key);
+        right = '<button class="check ' + (c ? "checked" : "") + '" data-toggle-row=' + attr(i) + ' data-toggle-tier=' + attr(t.key) + ' aria-pressed=' + attr(c) + '>' + icon("check", 14) + '</button>';
       }
-      return `<li>
-        <span class="num-badge">${i + 1}</span>
-        <span class="li-label">${esc(featureLabel(feat))}</span>
-        ${right}
-      </li>`;
+      return '<li><span class="num-badge">' + (i + 1) + '</span>'
+        + '<span class="li-label">' + esc(featureLabel(feat)) + '</span>'
+        + right + '</li>';
     }).join("");
-    return `<div class="tier-card">
-      <div class="tier-card-head ${t.colorClass}">${tierIcon(t.key, 18)} ${t.label}</div>
-      <ul>${items}</ul>
-      <div class="tier-card-footer">
-        <div>
-          <label class="field-label">Total Price</label>
-          <div class="price-input"><span>$</span>
-            <input type="text" inputmode="decimal" data-price="${t.key}" value="${esc(state.prices[t.key])}" placeholder="0.00" />
-          </div>
-        </div>
-        <button class="btn-red" data-pay="${t.key}" ${state.prices[t.key] ? "" : "disabled"}>${icon("calc", 14)} Payment Options</button>
-      </div>
-      <div class="tier-card-tagline ${t.colorClass}">${esc(t.tagline)}</div>
-    </div>`;
+    var disabled = state.prices[t.key] ? "" : "disabled";
+    return '<div class="tier-card">'
+      + '<div class="tier-card-head ' + t.colorClass + '">' + tierIcon(t.key, 18) + ' ' + t.label + '</div>'
+      + '<ul>' + items + '</ul>'
+      + '<div class="tier-card-footer">'
+      + '<div><label class="field-label">Total Price</label>'
+      + '<div class="price-input"><span>$</span>'
+      + '<input type="text" inputmode="decimal" data-price=' + attr(t.key) + ' value=' + attr(state.prices[t.key]) + ' placeholder="0.00" />'
+      + '</div></div>'
+      + '<button class="btn-red" data-pay=' + attr(t.key) + ' ' + disabled + '>'
+      + icon("calc", 14) + ' Payment Options</button>'
+      + '</div>'
+      + '<div class="tier-card-tagline ' + t.colorClass + '">' + esc(t.tagline) + '</div>'
+      + '</div>';
   }).join("");
 
-  root.innerHTML = `
-    <div class="container">
-      <header class="header">
-        <img class="logo" src="https://cdn.treehouseinternetgroup.com/cms_images/2721/klaus-logo-no-tag2.svg" alt="Klaus Roofing Systems" />
-        <div>
-          <h1 class="title">ROOFING SYSTEM <span class="accent">COMPARISON</span></h1>
-          <p class="subtitle">Compare features. Choose the protection that's right for you.</p>
-        </div>
-      </header>
-
-      <div class="toolbar">
-        <button class="link-btn" id="btn-admin">Admin</button>
-        <button class="link-btn" id="btn-reset">${icon("rotate", 14)} Reset</button>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:64px;background:var(--bg);"></th>
-              <th style="background:var(--bg);"></th>
-              ${tierHeads}
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRows}
-            <tr class="price-row">
-              <td class="row-num">$</td>
-              <td class="row-label">Total Price</td>
-              ${priceCells}
-            </tr>
-            <tr>
-              <td colspan="2" style="background:var(--bg);"></td>
-              ${payCells}
-            </tr>
-            <tr>
-              <td colspan="2" style="background:var(--bg);"></td>
-              ${taglineCells}
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="mobile-list">${mobileCards}</div>
-    </div>
-  `;
+  root.innerHTML = ''
+    + '<div class="container">'
+    +   '<header class="header">'
+    +     '<img class="logo" src="https://cdn.treehouseinternetgroup.com/cms_images/2721/klaus-logo-no-tag2.svg" alt="Klaus Roofing Systems" />'
+    +     '<div>'
+    +       '<h1 class="title">ROOFING SYSTEM <span class="accent">COMPARISON</span></h1>'
+    +       '<p class="subtitle">Compare features. Choose the protection that\'s right for you.</p>'
+    +     '</div>'
+    +   '</header>'
+    +   '<div class="toolbar">'
+    +     '<button class="link-btn" id="btn-admin">Admin</button>'
+    +     '<button class="link-btn" id="btn-reset">' + icon("rotate", 14) + ' Reset</button>'
+    +   '</div>'
+    +   '<div class="table-wrap"><table>'
+    +     '<thead><tr>'
+    +       '<th style="width:64px;background:var(--bg);"></th>'
+    +       '<th style="background:var(--bg);"></th>'
+    +       tierHeads
+    +     '</tr></thead>'
+    +     '<tbody>'
+    +       tableRows
+    +       '<tr class="price-row">'
+    +         '<td class="row-num">$</td>'
+    +         '<td class="row-label">Total Price</td>'
+    +         priceCells
+    +       '</tr>'
+    +       '<tr><td colspan="2" style="background:var(--bg);"></td>' + payCells + '</tr>'
+    +       '<tr><td colspan="2" style="background:var(--bg);"></td>' + taglineCells + '</tr>'
+    +     '</tbody>'
+    +   '</table></div>'
+    +   '<div class="mobile-list">' + mobileCards + '</div>'
+    + '</div>';
 
   // Wire up
-  root.querySelectorAll("[data-toggle-row]").forEach(el => {
-    el.addEventListener("click", () => toggleCheck(+el.dataset.toggleRow, el.dataset.toggleTier));
+  root.querySelectorAll("[data-toggle-row]").forEach(function (el) {
+    el.addEventListener("click", function () { toggleCheck(+el.dataset.toggleRow, el.dataset.toggleTier); });
   });
-  root.querySelectorAll("[data-info-row]").forEach(el => {
-    el.addEventListener("click", () => {
-      const feat = state.features[+el.dataset.infoRow];
-      const tier = el.dataset.infoTier;
+  root.querySelectorAll("[data-info-row]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var feat = state.features[+el.dataset.infoRow];
+      var tier = el.dataset.infoTier;
       openInfoModal(feat.label, feat.tiers[tier], feat.info[tier]);
     });
   });
-  root.querySelectorAll("[data-price]").forEach(el => {
-    el.addEventListener("input", (e) => {
-      const t = el.dataset.price;
+  root.querySelectorAll("[data-price]").forEach(function (el) {
+    el.addEventListener("input", function (e) {
+      var t = el.dataset.price;
       state.prices[t] = e.target.value.replace(/[^\d.]/g, "");
       savePrices(state.prices);
-      // Update disabled state for matching payment buttons
-      root.querySelectorAll(`[data-pay="${t}"]`).forEach(b => {
+      root.querySelectorAll('[data-pay="' + t + '"]').forEach(function (b) {
         if (state.prices[t]) b.removeAttribute("disabled"); else b.setAttribute("disabled", "");
       });
     });
   });
-  root.querySelectorAll("[data-pay]").forEach(el => {
-    el.addEventListener("click", () => openPaymentCalc(el.dataset.pay));
+  root.querySelectorAll("[data-pay]").forEach(function (el) {
+    el.addEventListener("click", function () { openPaymentCalc(el.dataset.pay); });
   });
-  document.getElementById("btn-admin").addEventListener("click", () => { window.location.hash = "#admin"; });
-  document.getElementById("btn-reset").addEventListener("click", () => {
+  document.getElementById("btn-admin").addEventListener("click", function () { window.location.hash = "#admin"; });
+  document.getElementById("btn-reset").addEventListener("click", function () {
     state.checks = {}; state.prices = { best: "", better: "", good: "" };
     saveChecks(state.checks); savePrices(state.prices);
     renderComparison();
@@ -594,191 +589,200 @@ function renderComparison() {
 }
 
 /* ===================== MODALS ===================== */
-let modalEl = null;
+var modalEl = null;
 function closeModal() { if (modalEl) { modalEl.remove(); modalEl = null; } }
 function openModal(html) {
   closeModal();
   modalEl = document.createElement("div");
   modalEl.className = "modal-bg";
-  modalEl.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
-  modalEl.addEventListener("click", (e) => { if (e.target === modalEl) closeModal(); });
+  modalEl.innerHTML = '<div class="modal" role="dialog" aria-modal="true">' + html + '</div>';
+  modalEl.addEventListener("click", function (e) { if (e.target === modalEl) closeModal(); });
   document.body.appendChild(modalEl);
-  modalEl.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeModal));
+  modalEl.querySelectorAll("[data-close]").forEach(function (b) { b.addEventListener("click", closeModal); });
   return modalEl;
 }
 
 function openInfoModal(label, tierLabel, text) {
-  openModal(`
-    <div class="modal-head">
-      <div class="title-stack"><span>${esc(label)}: ${esc(tierLabel)}</span></div>
-      <button class="close-x" data-close aria-label="Close">${icon("x", 18)}</button>
-    </div>
-    <div class="modal-body"><p>${esc(text)}</p></div>
-  `);
+  openModal(''
+    + '<div class="modal-head">'
+    +   '<div class="title-stack"><span>' + esc(label) + ': ' + esc(tierLabel) + '</span></div>'
+    +   '<button class="close-x" data-close aria-label="Close">' + icon("x", 18) + '</button>'
+    + '</div>'
+    + '<div class="modal-body"><p>' + esc(text) + '</p></div>'
+  );
 }
 
 /* ===================== PAYMENT CALC ===================== */
 function openPaymentCalc(tierKey) {
-  const tier = TIERS.find(t => t.key === tierKey);
-  const price = parseFloat(state.prices[tierKey]) || 0;
-  let downPayment = 0, apr = 8.99, termMonths = 60, aprInput = "8.99";
+  var tier = TIERS.find(function (t) { return t.key === tierKey; });
+  var price = parseFloat(state.prices[tierKey]) || 0;
+  var downPayment = 0, apr = 8.99, termMonths = 60, aprInput = "8.99";
 
-  const fmt = n => (n || 0).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+  function fmt(n) {
+    return (n || 0).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+  }
 
   function compute() {
-    const financed = Math.max(0, price - downPayment);
-    const r = apr / 100 / 12;
-    let monthly = 0;
+    var financed = Math.max(0, price - downPayment);
+    var r = apr / 100 / 12;
+    var monthly = 0;
     if (financed > 0 && termMonths > 0) {
       monthly = r === 0 ? financed / termMonths : (financed * r) / (1 - Math.pow(1 + r, -termMonths));
     }
-    const totalPaid = monthly * termMonths + downPayment;
-    const totalInterest = Math.max(0, totalPaid - price);
-    return { financed, monthly, totalPaid, totalInterest };
+    var totalPaid = monthly * termMonths + downPayment;
+    var totalInterest = Math.max(0, totalPaid - price);
+    return { financed: financed, monthly: monthly, totalPaid: totalPaid, totalInterest: totalInterest };
   }
 
   function html() {
-    const c = compute();
-    const headBg = "tier-head-bg-" + tier.key;
-    const quickOpts = [
+    var c = compute();
+    var headBg = "tier-head-bg-" + tier.key;
+    var quickOpts = [
       { label: "0%", val: 0 },
       { label: "10%", val: Math.round(price * 0.1) },
       { label: "20%", val: Math.round(price * 0.2) },
-      { label: "50%", val: Math.round(price * 0.5) },
+      { label: "50%", val: Math.round(price * 0.5) }
     ];
-    return `
-      <div class="modal-head ${headBg}">
-        <div class="title-stack">
-          <span class="sub">${esc(tier.label)} PLAN</span>
-          <span>Payment Options</span>
-        </div>
-        <button class="close-x" data-close aria-label="Close">${icon("x", 18)}</button>
-      </div>
-      <div class="modal-body">
-        <div class="pay-summary">
-          <span class="lbl">Total Price</span>
-          <span class="val">${fmt(price)}</span>
-        </div>
+    var quickHtml = quickOpts.map(function (o) {
+      return '<button class="quick-opt ' + (downPayment === o.val ? "active" : "") + '" data-down-set=' + attr(o.val) + '>' + o.label + '</button>';
+    }).join("");
+    var termHtml = [24, 36, 60, 120].map(function (m) {
+      return '<button class="term-btn ' + (termMonths === m ? "active" : "") + '" data-term=' + attr(m) + '>' + (m / 12) + 'yr</button>';
+    }).join("");
+    var downVal = downPayment ? downPayment.toLocaleString("en-US") : "";
 
-        <div class="field">
-          <label class="field-label">Down Payment</label>
-          <div class="stepper">
-            <button class="step-btn" data-down-delta="-500" aria-label="Decrease">${icon("minus", 14)}</button>
-            <div class="input-wrap has-prefix"><span class="prefix">$</span>
-              <input type="text" inputmode="decimal" id="down-input" value="${downPayment ? downPayment.toLocaleString("en-US") : ""}" />
-            </div>
-            <button class="step-btn" data-down-delta="500" aria-label="Increase">${icon("plus", 14)}</button>
-          </div>
-          <div class="quick-options">
-            ${quickOpts.map(o => `<button class="quick-opt ${downPayment === o.val ? "active" : ""}" data-down-set="${o.val}">${o.label}</button>`).join("")}
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="field-label">Interest Rate (APR): ${apr.toFixed(2)}%</label>
-          <div class="stepper">
-            <button class="step-btn" data-apr-delta="-0.25" aria-label="Decrease">${icon("minus", 14)}</button>
-            <div class="input-wrap has-suffix">
-              <input type="text" inputmode="decimal" id="apr-input" value="${esc(aprInput)}" />
-              <span class="suffix">%</span>
-            </div>
-            <button class="step-btn" data-apr-delta="0.25" aria-label="Increase">${icon("plus", 14)}</button>
-          </div>
-          <input type="range" id="apr-range" min="0" max="29.99" step="0.25" value="${apr}" />
-        </div>
-
-        <div class="field">
-          <label class="field-label">Term</label>
-          <div class="term-grid">
-            ${[24,36,60,120].map(m => `<button class="term-btn ${termMonths === m ? "active" : ""}" data-term="${m}">${m/12}yr</button>`).join("")}
-          </div>
-        </div>
-
-        <div class="result-box">
-          <div class="row main"><span class="lbl">Estimated Monthly</span><span class="val">${fmt(c.monthly)}</span></div>
-          <div class="row sub"><span>Amount Financed</span><span class="val">${fmt(c.financed)}</span></div>
-          <div class="row sub"><span>Total Interest</span><span class="val">${fmt(c.totalInterest)}</span></div>
-          <div class="row sub"><span>Total of Payments</span><span class="val">${fmt(c.totalPaid)}</span></div>
-        </div>
-
-        <p class="disclaimer">Estimates only. Actual rates and terms depend on credit approval and lender.</p>
-      </div>
-    `;
+    return ''
+      + '<div class="modal-head ' + headBg + '">'
+      +   '<div class="title-stack">'
+      +     '<span class="sub">' + esc(tier.label) + ' PLAN</span>'
+      +     '<span>Payment Options</span>'
+      +   '</div>'
+      +   '<button class="close-x" data-close aria-label="Close">' + icon("x", 18) + '</button>'
+      + '</div>'
+      + '<div class="modal-body">'
+      +   '<div class="pay-summary">'
+      +     '<span class="lbl">Total Price</span>'
+      +     '<span class="val">' + fmt(price) + '</span>'
+      +   '</div>'
+      +   '<div class="field">'
+      +     '<label class="field-label">Down Payment</label>'
+      +     '<div class="stepper">'
+      +       '<button class="step-btn" data-down-delta="-500" aria-label="Decrease">' + icon("minus", 14) + '</button>'
+      +       '<div class="input-wrap has-prefix"><span class="prefix">$</span>'
+      +         '<input type="text" inputmode="decimal" id="down-input" value=' + attr(downVal) + ' />'
+      +       '</div>'
+      +       '<button class="step-btn" data-down-delta="500" aria-label="Increase">' + icon("plus", 14) + '</button>'
+      +     '</div>'
+      +     '<div class="quick-options">' + quickHtml + '</div>'
+      +   '</div>'
+      +   '<div class="field">'
+      +     '<label class="field-label">Interest Rate (APR): ' + apr.toFixed(2) + '%</label>'
+      +     '<div class="stepper">'
+      +       '<button class="step-btn" data-apr-delta="-0.25" aria-label="Decrease">' + icon("minus", 14) + '</button>'
+      +       '<div class="input-wrap has-suffix">'
+      +         '<input type="text" inputmode="decimal" id="apr-input" value=' + attr(aprInput) + ' />'
+      +         '<span class="suffix">%</span>'
+      +       '</div>'
+      +       '<button class="step-btn" data-apr-delta="0.25" aria-label="Increase">' + icon("plus", 14) + '</button>'
+      +     '</div>'
+      +     '<input type="range" id="apr-range" min="0" max="29.99" step="0.25" value=' + attr(apr) + ' />'
+      +   '</div>'
+      +   '<div class="field">'
+      +     '<label class="field-label">Term</label>'
+      +     '<div class="term-grid">' + termHtml + '</div>'
+      +   '</div>'
+      +   '<div class="result-box">'
+      +     '<div class="row main"><span class="lbl">Estimated Monthly</span><span class="val">' + fmt(c.monthly) + '</span></div>'
+      +     '<div class="row sub"><span>Amount Financed</span><span class="val">' + fmt(c.financed) + '</span></div>'
+      +     '<div class="row sub"><span>Total Interest</span><span class="val">' + fmt(c.totalInterest) + '</span></div>'
+      +     '<div class="row sub"><span>Total of Payments</span><span class="val">' + fmt(c.totalPaid) + '</span></div>'
+      +   '</div>'
+      +   '<p class="disclaimer">Estimates only. Actual rates and terms depend on credit approval and lender.</p>'
+      + '</div>';
   }
 
   function rerender() {
-    const inner = modalEl.querySelector(".modal");
+    var inner = modalEl.querySelector(".modal");
     inner.innerHTML = html();
     wire();
   }
 
   function wire() {
-    modalEl.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeModal));
-    modalEl.querySelectorAll("[data-down-delta]").forEach(b => b.addEventListener("click", () => {
-      const d = parseFloat(b.dataset.downDelta);
-      downPayment = Math.max(0, Math.min(price, Math.round((downPayment + d) / 100) * 100));
-      rerender();
-    }));
-    modalEl.querySelectorAll("[data-down-set]").forEach(b => b.addEventListener("click", () => {
-      downPayment = parseFloat(b.dataset.downSet);
-      rerender();
-    }));
-    modalEl.querySelectorAll("[data-apr-delta]").forEach(b => b.addEventListener("click", () => {
-      const d = parseFloat(b.dataset.aprDelta);
-      apr = Math.max(0, Math.min(29.99, Math.round((apr + d) * 100) / 100));
-      aprInput = apr.toFixed(2);
-      rerender();
-    }));
-    modalEl.querySelectorAll("[data-term]").forEach(b => b.addEventListener("click", () => {
-      termMonths = parseInt(b.dataset.term, 10);
-      rerender();
-    }));
-    const downIn = modalEl.querySelector("#down-input");
-    if (downIn) downIn.addEventListener("input", (e) => {
-      const raw = e.target.value.replace(/[^\d.]/g, "");
-      const n = parseFloat(raw) || 0;
+    modalEl.querySelectorAll("[data-close]").forEach(function (b) { b.addEventListener("click", closeModal); });
+    modalEl.querySelectorAll("[data-down-delta]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var d = parseFloat(b.dataset.downDelta);
+        downPayment = Math.max(0, Math.min(price, Math.round((downPayment + d) / 100) * 100));
+        rerender();
+      });
+    });
+    modalEl.querySelectorAll("[data-down-set]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        downPayment = parseFloat(b.dataset.downSet);
+        rerender();
+      });
+    });
+    modalEl.querySelectorAll("[data-apr-delta]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var d = parseFloat(b.dataset.aprDelta);
+        apr = Math.max(0, Math.min(29.99, Math.round((apr + d) * 100) / 100));
+        aprInput = apr.toFixed(2);
+        rerender();
+      });
+    });
+    modalEl.querySelectorAll("[data-term]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        termMonths = parseInt(b.dataset.term, 10);
+        rerender();
+      });
+    });
+    var downIn = modalEl.querySelector("#down-input");
+    if (downIn) downIn.addEventListener("input", function (e) {
+      var raw = e.target.value.replace(/[^\d.]/g, "");
+      var n = parseFloat(raw) || 0;
       downPayment = Math.max(0, Math.min(price, n));
-      // Update only the dependent UI without losing focus
-      modalEl.querySelectorAll("[data-down-set]").forEach(b => {
+      modalEl.querySelectorAll("[data-down-set]").forEach(function (b) {
         b.classList.toggle("active", parseFloat(b.dataset.downSet) === downPayment);
       });
       updateResults();
     });
-    const aprIn = modalEl.querySelector("#apr-input");
+    var aprIn = modalEl.querySelector("#apr-input");
     if (aprIn) {
-      aprIn.addEventListener("input", (e) => {
+      aprIn.addEventListener("input", function (e) {
         aprInput = e.target.value;
-        const n = parseFloat(aprInput);
+        var n = parseFloat(aprInput);
         if (!isNaN(n)) {
           apr = Math.max(0, Math.min(29.99, Math.round(n * 100) / 100));
-          const lbl = modalEl.querySelector(".field-label");
-          // Update APR label
-          const labels = modalEl.querySelectorAll(".field-label");
-          labels.forEach(l => { if (l.textContent.startsWith("Interest")) l.textContent = `Interest Rate (APR): ${apr.toFixed(2)}%`; });
-          const range = modalEl.querySelector("#apr-range");
+          var labels = modalEl.querySelectorAll(".field-label");
+          labels.forEach(function (l) {
+            if (l.textContent.indexOf("Interest") === 0) l.textContent = "Interest Rate (APR): " + apr.toFixed(2) + "%";
+          });
+          var range = modalEl.querySelector("#apr-range");
           if (range) range.value = apr;
           updateResults();
         }
       });
-      aprIn.addEventListener("blur", () => { aprInput = apr.toFixed(2); aprIn.value = aprInput; });
+      aprIn.addEventListener("blur", function () { aprInput = apr.toFixed(2); aprIn.value = aprInput; });
     }
-    const range = modalEl.querySelector("#apr-range");
-    if (range) range.addEventListener("input", (e) => {
+    var range = modalEl.querySelector("#apr-range");
+    if (range) range.addEventListener("input", function (e) {
       apr = parseFloat(e.target.value);
       aprInput = apr.toFixed(2);
-      const aprInEl = modalEl.querySelector("#apr-input");
+      var aprInEl = modalEl.querySelector("#apr-input");
       if (aprInEl) aprInEl.value = aprInput;
-      const labels = modalEl.querySelectorAll(".field-label");
-      labels.forEach(l => { if (l.textContent.startsWith("Interest")) l.textContent = `Interest Rate (APR): ${apr.toFixed(2)}%`; });
+      var labels = modalEl.querySelectorAll(".field-label");
+      labels.forEach(function (l) {
+        if (l.textContent.indexOf("Interest") === 0) l.textContent = "Interest Rate (APR): " + apr.toFixed(2) + "%";
+      });
       updateResults();
     });
   }
 
   function updateResults() {
-    const c = compute();
-    const box = modalEl.querySelector(".result-box");
+    var c = compute();
+    var box = modalEl.querySelector(".result-box");
     if (!box) return;
-    const rows = box.querySelectorAll(".row .val");
+    var rows = box.querySelectorAll(".row .val");
     rows[0].textContent = fmt(c.monthly);
     rows[1].textContent = fmt(c.financed);
     rows[2].textContent = fmt(c.totalInterest);
@@ -790,170 +794,179 @@ function openPaymentCalc(tierKey) {
 }
 
 /* ===================== ADMIN VIEW ===================== */
-let dragIdx = null;
-let savedTimer = null;
+var dragIdx = null;
+var savedTimer = null;
 
 function flashSaved() {
-  const el = document.getElementById("saved-indicator");
+  var el = document.getElementById("saved-indicator");
   if (!el) return;
   el.classList.add("show");
   clearTimeout(savedTimer);
-  savedTimer = setTimeout(() => el.classList.remove("show"), 1200);
+  savedTimer = setTimeout(function () { el.classList.remove("show"); }, 1200);
 }
 
 function persistFeatures() { saveFeatures(state.features); flashSaved(); }
 
 function renderAdmin() {
-  const root = document.getElementById("root");
-  const items = state.features.map((feat, i) => {
-    let body;
+  var root = document.getElementById("root");
+  var items = state.features.map(function (feat, i) {
+    var body;
     if (typeof feat === "string") {
-      body = `
-        <input class="text-input" data-edit-label="${i}" value="${esc(feat)}" />
-        ${checkDefaultsHtml(i, { best: false, better: false, good: false })}
-      `;
+      body = '<input class="text-input" data-edit-label=' + attr(i) + ' value=' + attr(feat) + ' />'
+        + checkDefaultsHtml(i, { best: false, better: false, good: false });
     } else if (isTierFeature(feat)) {
-      body = `
-        <input class="text-input" data-edit-label="${i}" value="${esc(feat.label)}" placeholder="Feature label" />
-        <div class="tier-grid">
-          ${TIERS.map(t => `<div>
-            <label>${t.key}</label>
-            <input data-edit-tier="${i}" data-tier-key="${t.key}" value="${esc(feat.tiers[t.key])}" />
-          </div>`).join("")}
-        </div>
-        <div class="tier-grid">
-          ${TIERS.map(t => `<div>
-            <label>${t.key} info</label>
-            <textarea data-edit-info="${i}" data-tier-key="${t.key}" placeholder="Popup description...">${esc((feat.info || {})[t.key] || "")}</textarea>
-          </div>`).join("")}
-        </div>
-      `;
+      var tierInputs = TIERS.map(function (t) {
+        return '<div><label>' + t.key + '</label>'
+          + '<input data-edit-tier=' + attr(i) + ' data-tier-key=' + attr(t.key) + ' value=' + attr(feat.tiers[t.key]) + ' />'
+          + '</div>';
+      }).join("");
+      var infoInputs = TIERS.map(function (t) {
+        var v = (feat.info || {})[t.key] || "";
+        return '<div><label>' + t.key + ' info</label>'
+          + '<textarea data-edit-info=' + attr(i) + ' data-tier-key=' + attr(t.key) + ' placeholder="Popup description...">' + esc(v) + '</textarea>'
+          + '</div>';
+      }).join("");
+      body = '<input class="text-input" data-edit-label=' + attr(i) + ' value=' + attr(feat.label) + ' placeholder="Feature label" />'
+        + '<div class="tier-grid">' + tierInputs + '</div>'
+        + '<div class="tier-grid">' + infoInputs + '</div>';
     } else {
-      body = `
-        <input class="text-input" data-edit-label="${i}" value="${esc(feat.label)}" placeholder="Feature label" />
-        ${checkDefaultsHtml(i, feat.defaults)}
-      `;
+      body = '<input class="text-input" data-edit-label=' + attr(i) + ' value=' + attr(feat.label) + ' placeholder="Feature label" />'
+        + checkDefaultsHtml(i, feat.defaults);
     }
-    return `<li class="admin-item" draggable="true" data-idx="${i}">
-      <div class="admin-item-head">
-        <span class="drag-handle">${icon("grip", 16)}</span>
-        <span class="num-badge">${i + 1}</span>
-        <button class="trash-btn" data-remove="${i}" aria-label="Remove">${icon("trash", 16)}</button>
-      </div>
-      ${body}
-    </li>`;
+    return '<li class="admin-item" draggable="true" data-idx=' + attr(i) + '>'
+      + '<div class="admin-item-head">'
+      +   '<span class="drag-handle">' + icon("grip", 16) + '</span>'
+      +   '<span class="num-badge">' + (i + 1) + '</span>'
+      +   '<button class="trash-btn" data-remove=' + attr(i) + ' aria-label="Remove">' + icon("trash", 16) + '</button>'
+      + '</div>'
+      + body
+      + '</li>';
   }).join("");
 
-  root.innerHTML = `
-    <div class="container" style="max-width:720px;">
-      <button class="admin-back" id="back-btn">${icon("arrow-left", 14)} Back to comparison</button>
-      <h1 class="title" style="text-align:left;">MANAGE <span class="accent">FEATURES</span></h1>
-      <p class="subtitle" style="text-align:left;">Edit, reorder, add, or remove items shown in the comparison chart.</p>
+  var emptyMsg = '<li class="admin-item" style="text-align:center;color:var(--muted-fg);">No features yet. Add one below.</li>';
 
-      <div style="height:16px;"></div>
+  root.innerHTML = ''
+    + '<div class="container" style="max-width:720px;">'
+    +   '<button class="admin-back" id="back-btn">' + icon("arrow-left", 14) + ' Back to comparison</button>'
+    +   '<h1 class="title" style="text-align:left;">MANAGE <span class="accent">FEATURES</span></h1>'
+    +   '<p class="subtitle" style="text-align:left;">Edit, reorder, add, or remove items shown in the comparison chart.</p>'
+    +   '<div style="height:16px;"></div>'
+    +   '<div class="admin-card">'
+    +     '<div class="admin-head">'
+    +       '<span>Feature List (' + state.features.length + ')</span>'
+    +       '<div style="display:flex;align-items:center;gap:12px;">'
+    +         '<span class="saved-indicator" id="saved-indicator">Saved</span>'
+    +         '<button class="link-btn" style="color:inherit;opacity:0.8;" id="reset-btn">' + icon("rotate", 14) + ' Reset</button>'
+    +       '</div>'
+    +     '</div>'
+    +     '<ul class="admin-list" id="admin-list">' + (items || emptyMsg) + '</ul>'
+    +     '<div class="admin-footer">'
+    +       '<button class="btn-red" id="add-btn">' + icon("plus", 14) + ' Add Feature</button>'
+    +     '</div>'
+    +   '</div>'
+    +   '<p class="admin-help">Changes save automatically and appear in the comparison chart immediately.</p>'
+    + '</div>';
 
-      <div class="admin-card">
-        <div class="admin-head">
-          <span>Feature List (${state.features.length})</span>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <span class="saved-indicator" id="saved-indicator">Saved</span>
-            <button class="link-btn" style="color:inherit;opacity:0.8;" id="reset-btn">${icon("rotate", 14)} Reset</button>
-          </div>
-        </div>
-        <ul class="admin-list" id="admin-list">${items || `<li class="admin-item" style="text-align:center;color:var(--muted-fg);">No features yet. Add one below.</li>`}</ul>
-        <div class="admin-footer">
-          <button class="btn-red" id="add-btn">${icon("plus", 14)} Add Feature</button>
-        </div>
-      </div>
-
-      <p class="admin-help">Changes save automatically and appear in the comparison chart immediately.</p>
-    </div>
-  `;
-
-  document.getElementById("back-btn").addEventListener("click", () => { window.location.hash = ""; });
-  document.getElementById("add-btn").addEventListener("click", () => {
+  document.getElementById("back-btn").addEventListener("click", function () { window.location.hash = ""; });
+  document.getElementById("add-btn").addEventListener("click", function () {
     state.features.push("New feature");
     persistFeatures(); renderAdmin();
   });
-  document.getElementById("reset-btn").addEventListener("click", () => {
+  document.getElementById("reset-btn").addEventListener("click", function () {
     if (confirm("Reset features to the default list?")) {
       state.features = JSON.parse(JSON.stringify(DEFAULT_FEATURES));
       persistFeatures(); renderAdmin();
     }
   });
 
-  root.querySelectorAll("[data-remove]").forEach(b => b.addEventListener("click", () => {
-    state.features.splice(+b.dataset.remove, 1);
-    persistFeatures(); renderAdmin();
-  }));
+  root.querySelectorAll("[data-remove]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      state.features.splice(+b.dataset.remove, 1);
+      persistFeatures(); renderAdmin();
+    });
+  });
 
-  root.querySelectorAll("[data-edit-label]").forEach(inp => inp.addEventListener("input", (e) => {
-    const i = +inp.dataset.editLabel;
-    const f = state.features[i];
-    if (typeof f === "string") state.features[i] = e.target.value;
-    else f.label = e.target.value;
-    persistFeatures();
-  }));
-  root.querySelectorAll("[data-edit-tier]").forEach(inp => inp.addEventListener("input", (e) => {
-    const i = +inp.dataset.editTier;
-    state.features[i].tiers[inp.dataset.tierKey] = e.target.value;
-    persistFeatures();
-  }));
-  root.querySelectorAll("[data-edit-info]").forEach(inp => inp.addEventListener("input", (e) => {
-    const i = +inp.dataset.editInfo;
-    const f = state.features[i];
-    f.info = f.info || { best: "", better: "", good: "" };
-    f.info[inp.dataset.tierKey] = e.target.value;
-    if (!Object.values(f.info).some(v => (v || "").trim() !== "")) delete f.info;
-    persistFeatures();
-  }));
-  root.querySelectorAll("[data-default-check]").forEach(inp => inp.addEventListener("change", (e) => {
-    const i = +inp.dataset.defaultCheck;
-    const tier = inp.dataset.tierKey;
-    let f = state.features[i];
-    if (typeof f === "string") {
-      f = state.features[i] = { label: f, defaults: { best: false, better: false, good: false } };
-    }
-    if (!f.defaults) f.defaults = { best: false, better: false, good: false };
-    f.defaults[tier] = e.target.checked;
-    persistFeatures();
-  }));
+  root.querySelectorAll("[data-edit-label]").forEach(function (inp) {
+    inp.addEventListener("input", function (e) {
+      var i = +inp.dataset.editLabel;
+      var f = state.features[i];
+      if (typeof f === "string") state.features[i] = e.target.value;
+      else f.label = e.target.value;
+      persistFeatures();
+    });
+  });
+  root.querySelectorAll("[data-edit-tier]").forEach(function (inp) {
+    inp.addEventListener("input", function (e) {
+      var i = +inp.dataset.editTier;
+      state.features[i].tiers[inp.dataset.tierKey] = e.target.value;
+      persistFeatures();
+    });
+  });
+  root.querySelectorAll("[data-edit-info]").forEach(function (inp) {
+    inp.addEventListener("input", function (e) {
+      var i = +inp.dataset.editInfo;
+      var f = state.features[i];
+      f.info = f.info || { best: "", better: "", good: "" };
+      f.info[inp.dataset.tierKey] = e.target.value;
+      if (!Object.values(f.info).some(function (v) { return (v || "").trim() !== ""; })) delete f.info;
+      persistFeatures();
+    });
+  });
+  root.querySelectorAll("[data-default-check]").forEach(function (inp) {
+    inp.addEventListener("change", function (e) {
+      var i = +inp.dataset.defaultCheck;
+      var tier = inp.dataset.tierKey;
+      var f = state.features[i];
+      if (typeof f === "string") {
+        f = state.features[i] = { label: f, defaults: { best: false, better: false, good: false } };
+      }
+      if (!f.defaults) f.defaults = { best: false, better: false, good: false };
+      f.defaults[tier] = e.target.checked;
+      persistFeatures();
+    });
+  });
 
   // Drag and drop
-  root.querySelectorAll(".admin-item[draggable]").forEach(li => {
-    li.addEventListener("dragstart", () => { dragIdx = +li.dataset.idx; li.classList.add("dragging"); });
-    li.addEventListener("dragend", () => { li.classList.remove("dragging"); persistFeatures(); renderAdmin(); });
-    li.addEventListener("dragover", (e) => {
+  root.querySelectorAll(".admin-item[draggable]").forEach(function (li) {
+    li.addEventListener("dragstart", function () { dragIdx = +li.dataset.idx; li.classList.add("dragging"); });
+    li.addEventListener("dragend", function () { li.classList.remove("dragging"); persistFeatures(); renderAdmin(); });
+    li.addEventListener("dragover", function (e) {
       e.preventDefault();
-      const i = +li.dataset.idx;
+      var i = +li.dataset.idx;
       if (dragIdx === null || dragIdx === i) return;
-      const [moved] = state.features.splice(dragIdx, 1);
+      var moved = state.features.splice(dragIdx, 1)[0];
       state.features.splice(i, 0, moved);
       dragIdx = i;
-      // Re-render just enough — full rerender for simplicity
       renderAdmin();
-      const newLi = document.querySelector(`.admin-item[data-idx="${i}"]`);
+      var newLi = document.querySelector('.admin-item[data-idx="' + i + '"]');
       if (newLi) newLi.classList.add("dragging");
     });
   });
 }
 
 function checkDefaultsHtml(i, defaults) {
-  return `<div>
-    <label class="field-label" style="margin-top:8px;">Checked by default</label>
-    <div class="check-grid">
-      ${TIERS.map(t => `<label>
-        <input type="checkbox" data-default-check="${i}" data-tier-key="${t.key}" ${defaults[t.key] ? "checked" : ""} />
-        <span>${t.key}</span>
-      </label>`).join("")}
-    </div>
-  </div>`;
+  var boxes = TIERS.map(function (t) {
+    var checked = defaults[t.key] ? "checked" : "";
+    return '<label>'
+      + '<input type="checkbox" data-default-check=' + attr(i) + ' data-tier-key=' + attr(t.key) + ' ' + checked + ' />'
+      + '<span>' + t.key + '</span>'
+      + '</label>';
+  }).join("");
+  return '<div>'
+    + '<label class="field-label" style="margin-top:8px;">Checked by default</label>'
+    + '<div class="check-grid">' + boxes + '</div>'
+    + '</div>';
 }
 
 /* ===================== BOOT ===================== */
 window.addEventListener("hashchange", render);
-window.addEventListener("storage", () => { state.features = loadFeatures(); state.checks = loadChecks(); state.prices = loadPrices(); render(); });
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+window.addEventListener("storage", function () {
+  state.features = loadFeatures();
+  state.checks = loadChecks();
+  state.prices = loadPrices();
+  render();
+});
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
 render();
 </script>
 </body>
